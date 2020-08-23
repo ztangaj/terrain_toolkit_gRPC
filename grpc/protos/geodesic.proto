@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package geodesic_gRPC;
+
+// The greeting service definition.
+service Geodesic {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  // request shortest path using vertex id
+  rpc FindPathByVertexID(FindPathByVertexIDRequest) returns (Path) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
+
+// request shortest path using vertex id
+message FindPathByVertexIDRequest {
+    string algo_type = 1;
+    int32 v1_id = 2;
+    int32 v2_id = 3;
+}
+
+// message findPathVertexCordRequest {
+//     algo_type
+//     v1_cord
+//     v2_cord
+// }
+
+// the response containing the path
+message Path {
+    repeated float path = 1;
+    string message = 2;
+}

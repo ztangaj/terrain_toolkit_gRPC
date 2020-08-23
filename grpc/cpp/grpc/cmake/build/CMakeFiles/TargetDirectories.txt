@@ -1,0 +1,4 @@
+/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/CMakeFiles/edit_cache.dir
+/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/CMakeFiles/geodesic_server.dir
+/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/CMakeFiles/geodesic_client.dir

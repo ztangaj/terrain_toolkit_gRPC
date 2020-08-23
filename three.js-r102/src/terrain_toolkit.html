@@ -35,6 +35,7 @@
 	</head>
 
 	<body>
+		<input type="file" name="inputfile" id="inputfile"> 
 		<!-- <div id="info">
 		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> Terrain ToolKit
 		</div> -->
@@ -155,6 +156,9 @@
 				faces: "0",
 			};
 
+			var highlightVertex = false;
+			
+			//TODO: use shader language to determine the max min z value
 			// var terrainMaterial = new THREE.ShaderMaterial({				
 			// 	vertexShader: document.getElementById('vertexShader').textContent,
 			// 	fragmentShader: document.getElementById('fragmentShader').textContent,	
@@ -182,7 +186,7 @@
 
 			function init() {	
 				var center;
-				var distance;			
+				var distance;
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
@@ -210,29 +214,31 @@
 
 				// after load model, we have vertices, can render the points
 				manager.onLoad = function () {
-					// console.log(vertices);
-					var colors = new Float32Array( vertices.length );
-					var sizes = new Float32Array( vertices.length );
+					if(highlightVertex){				
+						console.log(vertices);
+						var colors = new Float32Array( vertices.length );
+						var sizes = new Float32Array( vertices.length );
 
-					var color = new THREE.Color();
-					for ( var i = 0, l = vertices.length / 3; i < l; i ++ ) {
-						// color.setHSL( 0.01 + 0.1 * ( i / l ), 1.0, 0.5 );
-						color = new THREE.Color("rgb(255,0,0)");
-						color.toArray( colors, i * 3 );
-						sizes[ i ] = PARTICLE_SIZE;
+						var color = new THREE.Color();
+						for ( var i = 0, l = vertices.length / 3; i < l; i ++ ) {
+							// color.setHSL( 0.01 + 0.1 * ( i / l ), 1.0, 0.5 );
+							color = new THREE.Color("rgb(255,0,0)");
+							color.toArray( colors, i * 3 );
+							sizes[ i ] = PARTICLE_SIZE;
+						}
+						var geometry = new THREE.BufferGeometry();
+						geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+						geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+						geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+
+						particles = new THREE.Points( geometry, pointMaterial );
+
+						particles.name = "points";
+						scene.add( particles );
+
+						terrainInfo.points = vertices.length;
+						refreshControlPanel();
 					}
-					var geometry = new THREE.BufferGeometry();
-					geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-					geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
-					geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
-
-					particles = new THREE.Points( geometry, pointMaterial );
-
-					particles.name = "points";
-					scene.add( particles );
-
-					terrainInfo.points = vertices.length;
-					refreshControlPanel();
 				};
 				
 				function onProgress( xhr ) {
@@ -453,6 +459,36 @@
 				}
 				// gui.add(options, 'reset');
 			}
+
+			// TODO: 1. change input, maybe not a file
+			document.getElementById('inputfile') .addEventListener('change', function() {
+				var fr=new FileReader();         
+				fr.readAsText(this.files[0]); 
+				fr.onload=function(){ 					
+					var path = [];
+					const allLines =  fr.result.split(/\r\n|\n/);
+					// Reading line by line
+					for(var i=0; i<allLines.length; i++){
+						var line = allLines[i];
+						var cord = line.split(" ");
+						x = parseInt(cord[0], 10);
+						y = parseInt(cord[1], 10);
+						z = parseInt(cord[2], 10);
+						var v = new THREE.Vector3(x,y,z);
+						path.push(v);
+					}
+					var geometry = new THREE.BufferGeometry().setFromPoints(path);
+					var material = new THREE.LineBasicMaterial({
+						color: 0xff0000,
+						linewidth: 3,
+					});
+
+					var line = new THREE.Line(geometry, material);
+					scene.add(line);
+					console.log(path);
+					console.log(scene);
+				}
+			});
 
 			function animate() {
 
