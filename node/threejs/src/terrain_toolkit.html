@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Terrain ToolKit Web Version</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				color: #fff;
+				position: relative;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#pickPoint {
+				color: #fff;
+				position: relative;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+		</style>
+	</head>
+
+	<body>
+		<input type="file" name="inputfile" id="inputfile"> 
+		<button id="testbtn">Get Path Test</button>
+		<!-- <div id="info">
+		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> Terrain ToolKit
+		</div> -->
+
+		<script src="js/WebGL.js"></script>
+		<script src="../build/three.js"></script>
+		<script src="js/loaders/OBJLoader.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src="js/dat.gui.js"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vUv;
+			varying float max_z;
+			varying float min_z;
+			
+			bool isNan(float val)
+			{
+				return (val <= 0.0 || 0.0 <= val) ? false : true;
+			}			
+			
+			void main() {
+				vUv = position;
+				if(isNan(max_z)) {
+					max_z = position.z;
+				};
+				if(isNan(min_z)) {
+					min_z = position.z;
+				};
+				if(position.z > max_z) {
+					max_z = position.z;
+				};
+				if(position.z < min_z){
+					min_z = position.z;
+				};
+				vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+				gl_Position = projectionMatrix * modelViewPosition;
+			}
+		</script>
+
+		<script type="x-shader/x-fragmant" id="fragmentShader">
+			varying float min_z;
+			varying float max_z;
+			varying vec3 vUv;
+			void main(){
+				float r = (vUv.z - 1263.0)/(1545.0-1263.0);
+				gl_FragColor = vec4(r, 1.0-r, 0.0, 1.0);
+			}
+		</script>
+		<!-- for points -->
+		<script type="x-shader/x-vertex" id="vertexshaderPt">
+
+			attribute float size;
+			attribute vec3 customColor;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				vColor = customColor;
+
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+				gl_PointSize = size * ( 300.0 / -mvPosition.z );
+
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshaderPt">
+
+			uniform vec3 color;
+			uniform sampler2D texture;
+
+			varying vec3 vColor;
+
+			void main() {
+
+				gl_FragColor = vec4( color * vColor, 1.0 );
+
+				gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+
+				if ( gl_FragColor.a < ALPHATEST ) discard;
+
+			}
+
+		</script>
+
+		<script>			
+			if ( WEBGL.isWebGLAvailable() === false ) {
+				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+			}
+
+			// https://3d-convert.com/en/convert/off-to-obj.html
+			var MODEL_PATH = "models/obj/small_terrain.obj";
+
+			var container;		
+
+			var camera, scene, renderer;
+
+			var particles;
+			var PARTICLE_SIZE = 30;
+
+			var raycaster, intersects, mouse;
+
+			var controls;		
+
+			var vertices;	
+
+			var selectedPoints = [];
+
+			var controlPanel;
+
+			var terrainInfo = {
+				points: "0",
+				edges: "0",
+				faces: "0",
+			};
+
+			var highlightVertex = false;
+			
+			//TODO: use shader language to determine the max min z value
+			// var terrainMaterial = new THREE.ShaderMaterial({				
+			// 	vertexShader: document.getElementById('vertexShader').textContent,
+			// 	fragmentShader: document.getElementById('fragmentShader').textContent,	
+			// 	wireframe: true,			
+			// });
+
+			var terrainMaterial = new THREE.MeshNormalMaterial();
+			terrainMaterial.wireframe = true;
+
+			var pointMaterial = new THREE.ShaderMaterial( {
+				uniforms: {
+					color: { value: new THREE.Color( 0xffffff ) },
+					texture: { value: new THREE.TextureLoader().load( "textures/sprites/ball.png" ) }
+				},
+				vertexShader: document.getElementById( 'vertexshaderPt' ).textContent,
+				fragmentShader: document.getElementById( 'fragmentshaderPt' ).textContent,
+
+				alphaTest: 0.9
+			} );
+
+			init();			
+			animate();	
+			refreshControlPanel();
+			// getObject();		
+
+			function init() {	
+				var center;
+				var distance;
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+
+				// scene
+
+				scene = new THREE.Scene();
+
+				var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
+				scene.add( ambientLight );
+
+				var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+				camera.add( pointLight );
+				scene.add( camera );
+				
+				// load model manager
+				var manager = new THREE.LoadingManager();
+
+				manager.onProgress = function ( item, loaded, total ) {
+
+					console.log( item, loaded, total );
+
+				};
+
+				// after load model, we have vertices, can render the points
+				manager.onLoad = function () {
+					if(highlightVertex){				
+						console.log(vertices);
+						var colors = new Float32Array( vertices.length );
+						var sizes = new Float32Array( vertices.length );
+
+						var color = new THREE.Color();
+						for ( var i = 0, l = vertices.length / 3; i < l; i ++ ) {
+							// color.setHSL( 0.01 + 0.1 * ( i / l ), 1.0, 0.5 );
+							color = new THREE.Color("rgb(255,0,0)");
+							color.toArray( colors, i * 3 );
+							sizes[ i ] = PARTICLE_SIZE;
+						}
+						var geometry = new THREE.BufferGeometry();
+						geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+						geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+						geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+
+						particles = new THREE.Points( geometry, pointMaterial );
+
+						particles.name = "points";
+						scene.add( particles );
+
+						terrainInfo.points = vertices.length;
+						refreshControlPanel();
+					}
+				};
+				
+				function onProgress( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
+					}
+				}
+
+				function onError() {}				
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				
+				controls = new THREE.OrbitControls( camera, renderer.domElement );																			
+
+				var loader = new THREE.OBJLoader( manager );					
+
+				loader.load( MODEL_PATH, function( object ) {	
+					object.traverse( function ( child ) {
+						console.log(child);
+						if(child.isMesh) {
+							console.log(child.geometry.faces);
+							child.material = terrainMaterial;							
+							vertices = child.geometry.attributes.position.array;
+						};
+					} );
+					object.name = "test";
+					scene.add(object);									
+
+					center = getGeoCenter(object);
+					distance = getCameraDistance(object);
+					console.log(center);
+					console.log(distance);
+
+					camera.position.set( center.x , center.y, center.z + distance);	
+					controls.target.set(center.x, center.y, center.z );
+					controls.update();						
+				}
+				, onProgress, onError );				
+
+				// 
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+
+				renderer.domElement.addEventListener( 'click', onMouseClick, false );
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+			}						
+
+			// on mouse click, get the vertice clicked and high light
+			function setVertexSize(attributes, index, scale) {
+				attributes.size.array[ index ] = PARTICLE_SIZE * scale;
+				attributes.size.needsUpdate = true;
+			}
+
+			function setVertexColor(attributes, index, r,g,b){
+				attributes.customColor.array[ 3 * index ] = r;
+				attributes.customColor.array[ 3 * index + 1 ] = g;
+				attributes.customColor.array[ 3 * index + 2 ] = b;
+				attributes.customColor.needsUpdate = true;
+			}
+
+			function onMouseClick() {
+				var attributes = particles.geometry.attributes;
+				var positionArray = attributes.position.array;
+
+				raycaster.setFromCamera(mouse, camera);
+				intersects = raycaster.intersectObject(particles);
+
+				// no need to be too precise, otherwise selection can be hard
+				raycaster.params = {
+					Mesh: {},
+					Line: { threshold: 1 },
+					LOD: {},
+					Points: { threshold: 10 },
+					Sprite: { threshold: 1}
+				}
+			
+				if(intersects.length > 0){
+					// TODO: eliminate the repeated points in the array, for now we only take the first coordinate				
+					var attribute_index = 3 * intersects[0].index;
+					var currentPoint = new THREE.Vector3(positionArray[attribute_index], positionArray[attribute_index+1], positionArray[attribute_index+2])
+					console.log(currentPoint);
+					
+					// check if this is a new point
+					var isNewPoint = true;
+					for(var i = 0; i<selectedPoints.length; i++){
+						console.log(i);
+						if(selectedPoints[i].equals(currentPoint)){
+							isNewPoint = false;
+							selectedPoints.splice(i, 1);
+							// remove highlight
+							for(var j=0; j<intersects.length; j++){						
+								setVertexSize(attributes, intersects[j].index, 1);
+								setVertexColor(attributes, intersects[j].index, 1.0, 0.0, 0.0);
+							}						
+							break;
+						}
+					}			
+
+					// new point and selected less than 2
+					if(isNewPoint && selectedPoints.length < 2) {
+						console.log("New Point!")
+						selectedPoints.push(currentPoint);						
+						// color and enlarge need to be done for all repeated points
+						for(var i=0; i<intersects.length; i++){						
+							setVertexSize(attributes, intersects[i].index, 1.25);
+							setVertexColor(attributes, intersects[i].index, 0.0, 1.0, 0.0);
+						}						
+					}			
+					else{
+						console.log("Only allow select 2 at a time!");
+					}	
+					// if new point but selected is already 2, do nothing, user need to deselect previous points, maybe a bad design
+
+					//debug
+					console.log(selectedPoints);
+					refreshControlPanel();
+				}
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+
+			function  onDocumentMouseMove( event ) {
+				event.preventDefault();
+				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				// offset is 1 in 3js example, but by my finetune should be 1.08 
+				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1.08;
+			}
+
+			// helper function
+			function drawPath(pathStr){
+				var cords = pathStr.split(",");	
+				var points = [];			
+				for(var i=0; i<cords.length; i+=3){
+					var v = new THREE.Vector3(cords[i], cords[i+1], cords[i+2]);
+					points.push(v);
+				}
+				var geometry = new THREE.BufferGeometry().setFromPoints(points);
+				var material = new THREE.LineBasicMaterial({
+					color: 0xff0000,
+					linewidth: 3,
+				});
+
+				var line = new THREE.Line(geometry, material);
+				scene.add(line);
+			}
+
+			function getGeoCenter(object) {				
+				 var boundingbox = new THREE.Box3();
+				 boundingbox.setFromObject(object);
+				 console.log(boundingbox);
+				 return boundingbox.getCenter();
+			}
+ 
+			 function getCameraDistance(object) {
+				 var boundingbox = new THREE.Box3();
+				 boundingbox.setFromObject(object);
+				 sceneRadiusForCamera = Math.max(
+					 boundingbox.max.y - boundingbox.min.y,
+					 boundingbox.max.z - boundingbox.min.z,
+					 boundingbox.max.x - boundingbox.min.x
+				 )/2 * (1 + Math.sqrt(5));
+				 return sceneRadiusForCamera;
+			}
+
+			function vec3ToString(vec){
+				return vec.x + "," + vec.y + "," + vec.z;
+			}
+			
+			function refreshControlPanel() {
+				// Options to be added to the GUI
+				var options = {
+					basicInfo: this.terrainInfo,
+
+					pointA: selectedPoints[0] ? vec3ToString(selectedPoints[0]) : "empty",
+					pointB: selectedPoints[1] ? vec3ToString(selectedPoints[1]) : "empty",
+					camera: {
+						speed: 0.0001
+					},
+					findPath: function() {
+						// placeholder
+					},
+					reset: function() {
+						this.velx = 0.1;
+						this.vely = 0.1;
+						camera.position.z = 75;
+						camera.position.x = 0;
+						camera.position.y = 0;
+						cube.scale.x = 1;
+						cube.scale.y = 1;
+						cube.scale.z = 1;
+						cube.material.wireframe = true;
+					}
+				};
+				// DAT.GUI Related Stuff
+				// refresh
+				if(controlPanel) {
+					controlPanel.destroy();
+				}
+
+				controlPanel = new dat.GUI();
+				var terrainInfo = controlPanel.addFolder('Basic information');
+				terrainInfo.add(options.basicInfo, 'points').name('Number of points');
+				terrainInfo.add(options.basicInfo, 'edges').name('Number of edges');
+				terrainInfo.add(options.basicInfo, 'faces').name('Number of faces');
+				terrainInfo.open();
+
+				var points = controlPanel.addFolder('Selected Points');
+				points.add(options, 'pointA').name('Point A').listen();
+				points.add(options, 'pointB').name('Point B').listen();
+				points.open();
+
+				var algorithms = controlPanel.addFolder('Algorithm');
+				// velocity.add(options, 'velx', -0.2, 0.2).name('X').listen();
+				// velocity.add(options, 'vely', -0.2, 0.2).name('Y').listen();
+				// velocity.open();
+
+				var box = controlPanel.addFolder('Texture');
+				// box.add(cube.scale, 'x', 0, 3).name('Width').listen();
+				// box.add(cube.scale, 'y', 0, 3).name('Height').listen();
+				// box.add(cube.scale, 'z', 0, 3).name('Length').listen();
+				// box.add(cube.material, 'wireframe').listen();
+				// box.open();
+
+				if(selectedPoints[0]&&selectedPoints[1]){
+					controlPanel.add(options, 'findPath').name('Find shortest path');
+				}
+				// gui.add(options, 'reset');
+			}
+
+			document.getElementById('testbtn').addEventListener('click', function() {
+				console.log("clicked!");
+				axios({
+					method: 'post',
+					url: 'http://localhost:8080/getpath',
+					data: {
+					}
+				})
+				.then(response=>{
+					drawPath(response.data.path);
+				})
+				.catch(err=>{
+					console.log(err);
+				})			
+			})
+
+			// TODO: 1. change input, maybe not a file
+			document.getElementById('inputfile') .addEventListener('change', function() {
+				var fr=new FileReader();         
+				fr.readAsText(this.files[0]); 
+				fr.onload=function(){ 					
+					var path = [];
+					const allLines =  fr.result.split(/\r\n|\n/);
+					// Reading line by line
+					for(var i=0; i<allLines.length; i++){
+						var line = allLines[i];
+						var cord = line.split(" ");
+						x = parseInt(cord[0], 10);
+						y = parseInt(cord[1], 10);
+						z = parseInt(cord[2], 10);
+						var v = new THREE.Vector3(x,y,z);
+						path.push(v);
+					}
+					var geometry = new THREE.BufferGeometry().setFromPoints(path);
+					var material = new THREE.LineBasicMaterial({
+						color: 0xff0000,
+						linewidth: 3,
+					});
+
+					var line = new THREE.Line(geometry, material);
+					scene.add(line);
+					console.log(path);
+					console.log(scene);
+				}
+			});
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+				controls.update();
+				render();
+
+			}
+
+			function render() {						
+				renderer.render( scene, camera );
+			}
+
+			function getObject() {
+				scene.traverse (function (object)
+				{
+					console.log(object);
+				});
+			}
+		</script>
+
+	</body>
+</html>
