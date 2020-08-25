@@ -28,7 +28,7 @@ using grpc::ClientContext;
 using grpc::Status;
 using geodesic_gRPC::HelloRequest;
 using geodesic_gRPC::HelloReply;
-using geodesic_gRPC::FindPathByVertexIDRequest;
+using geodesic_gRPC::FindPathByVertexCordRequest;
 using geodesic_gRPC::Path;
 using geodesic_gRPC::Geodesic;
 
@@ -64,15 +64,15 @@ class GeodesicClient {
     }
   }
 
-  std::string FindPathByVertexID(const std::string& user) {
+  std::string FindPathByVertexCord(const std::string& user) {
     // Follows the same pattern as SayHello.
-    FindPathByVertexIDRequest request;
+    FindPathByVertexCordRequest request;
     request.set_algo_type(user);
     Path path;
     ClientContext context;
 
     // Here we can use the stub's newly available method we just added.
-    Status status = stub_->FindPathByVertexID(&context, request, &path);
+    Status status = stub_->FindPathByVertexCord(&context, request, &path);
     if (status.ok()) {
       std::cout.precision(12);
       std::cout << path.path().Get(1);
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
   std::string reply = client.SayHello(user);
   std::cout << "Greeter received: " << reply << std::endl;
 
-  reply = client.FindPathByVertexID(user);
+  reply = client.FindPathByVertexCord(user);
   std::cout << "Greeter received: " << reply << std::endl;
 
   return 0;

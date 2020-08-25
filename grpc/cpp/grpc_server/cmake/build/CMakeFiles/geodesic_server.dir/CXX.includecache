@@ -184,11 +184,11 @@ stdio.h
 stdlib.h
 -
 
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.grpc.pb.cc
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.grpc.pb.cc
 geodesic.pb.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.pb.h
 geodesic.grpc.pb.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.grpc.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.grpc.pb.h
 functional
 -
 grpcpp/impl/codegen/async_stream.h
@@ -212,9 +212,9 @@ grpcpp/impl/codegen/service_type.h
 grpcpp/impl/codegen/sync_stream.h
 -
 
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.grpc.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.grpc.pb.h
 geodesic.pb.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.pb.h
 functional
 -
 grpcpp/impl/codegen/async_generic_service.h
@@ -242,9 +242,9 @@ grpcpp/impl/codegen/stub_options.h
 grpcpp/impl/codegen/sync_stream.h
 -
 
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.pb.cc
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.pb.cc
 geodesic.pb.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.pb.h
 algorithm
 -
 google/protobuf/stubs/common.h
@@ -268,7 +268,7 @@ google/protobuf/port_def.inc
 google/protobuf/port_undef.inc
 -
 
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build/geodesic.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build/geodesic.pb.h
 limits
 -
 string
@@ -304,7 +304,7 @@ google/protobuf/port_def.inc
 google/protobuf/port_undef.inc
 -
 
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/geodesic_server.cc
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/geodesic_server.cc
 iostream
 -
 memory
@@ -314,7 +314,7 @@ string
 grpcpp/grpcpp.h
 -
 geodesic.grpc.pb.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/geodesic.grpc.pb.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/geodesic.grpc.pb.h
 sstream
 -
 unistd.h
@@ -330,9 +330,9 @@ sstream
 sys/times.h
 -
 distance.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/distance.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/distance.h
 geodesic_algorithm_subdivision.h
-/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/geodesic_algorithm_subdivision.h
+/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/geodesic_algorithm_subdivision.h
 
 /usr/local/include/google/protobuf/arena.h
 limits

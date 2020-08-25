@@ -49,9 +49,9 @@ struct TableStruct_geodesic_2eproto {
 };
 void AddDescriptors_geodesic_2eproto();
 namespace geodesic_gRPC {
-class FindPathByVertexIDRequest;
-class FindPathByVertexIDRequestDefaultTypeInternal;
-extern FindPathByVertexIDRequestDefaultTypeInternal _FindPathByVertexIDRequest_default_instance_;
+class FindPathByVertexCordRequest;
+class FindPathByVertexCordRequestDefaultTypeInternal;
+extern FindPathByVertexCordRequestDefaultTypeInternal _FindPathByVertexCordRequest_default_instance_;
 class HelloReply;
 class HelloReplyDefaultTypeInternal;
 extern HelloReplyDefaultTypeInternal _HelloReply_default_instance_;
@@ -64,7 +64,7 @@ extern PathDefaultTypeInternal _Path_default_instance_;
 }  // namespace geodesic_gRPC
 namespace google {
 namespace protobuf {
-template<> ::geodesic_gRPC::FindPathByVertexIDRequest* Arena::CreateMaybeMessage<::geodesic_gRPC::FindPathByVertexIDRequest>(Arena*);
+template<> ::geodesic_gRPC::FindPathByVertexCordRequest* Arena::CreateMaybeMessage<::geodesic_gRPC::FindPathByVertexCordRequest>(Arena*);
 template<> ::geodesic_gRPC::HelloReply* Arena::CreateMaybeMessage<::geodesic_gRPC::HelloReply>(Arena*);
 template<> ::geodesic_gRPC::HelloRequest* Arena::CreateMaybeMessage<::geodesic_gRPC::HelloRequest>(Arena*);
 template<> ::geodesic_gRPC::Path* Arena::CreateMaybeMessage<::geodesic_gRPC::Path>(Arena*);
@@ -314,25 +314,25 @@ class HelloReply final :
 };
 // -------------------------------------------------------------------
 
-class FindPathByVertexIDRequest final :
-    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:geodesic_gRPC.FindPathByVertexIDRequest) */ {
+class FindPathByVertexCordRequest final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:geodesic_gRPC.FindPathByVertexCordRequest) */ {
  public:
-  FindPathByVertexIDRequest();
-  virtual ~FindPathByVertexIDRequest();
+  FindPathByVertexCordRequest();
+  virtual ~FindPathByVertexCordRequest();
 
-  FindPathByVertexIDRequest(const FindPathByVertexIDRequest& from);
+  FindPathByVertexCordRequest(const FindPathByVertexCordRequest& from);
 
-  inline FindPathByVertexIDRequest& operator=(const FindPathByVertexIDRequest& from) {
+  inline FindPathByVertexCordRequest& operator=(const FindPathByVertexCordRequest& from) {
     CopyFrom(from);
     return *this;
   }
   #if LANG_CXX11
-  FindPathByVertexIDRequest(FindPathByVertexIDRequest&& from) noexcept
-    : FindPathByVertexIDRequest() {
+  FindPathByVertexCordRequest(FindPathByVertexCordRequest&& from) noexcept
+    : FindPathByVertexCordRequest() {
     *this = ::std::move(from);
   }
 
-  inline FindPathByVertexIDRequest& operator=(FindPathByVertexIDRequest&& from) noexcept {
+  inline FindPathByVertexCordRequest& operator=(FindPathByVertexCordRequest&& from) noexcept {
     if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -344,34 +344,34 @@ class FindPathByVertexIDRequest final :
   static const ::google::protobuf::Descriptor* descriptor() {
     return default_instance().GetDescriptor();
   }
-  static const FindPathByVertexIDRequest& default_instance();
+  static const FindPathByVertexCordRequest& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const FindPathByVertexIDRequest* internal_default_instance() {
-    return reinterpret_cast<const FindPathByVertexIDRequest*>(
-               &_FindPathByVertexIDRequest_default_instance_);
+  static inline const FindPathByVertexCordRequest* internal_default_instance() {
+    return reinterpret_cast<const FindPathByVertexCordRequest*>(
+               &_FindPathByVertexCordRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     2;
 
-  void Swap(FindPathByVertexIDRequest* other);
-  friend void swap(FindPathByVertexIDRequest& a, FindPathByVertexIDRequest& b) {
+  void Swap(FindPathByVertexCordRequest* other);
+  friend void swap(FindPathByVertexCordRequest& a, FindPathByVertexCordRequest& b) {
     a.Swap(&b);
   }
 
   // implements Message ----------------------------------------------
 
-  inline FindPathByVertexIDRequest* New() const final {
-    return CreateMaybeMessage<FindPathByVertexIDRequest>(nullptr);
+  inline FindPathByVertexCordRequest* New() const final {
+    return CreateMaybeMessage<FindPathByVertexCordRequest>(nullptr);
   }
 
-  FindPathByVertexIDRequest* New(::google::protobuf::Arena* arena) const final {
-    return CreateMaybeMessage<FindPathByVertexIDRequest>(arena);
+  FindPathByVertexCordRequest* New(::google::protobuf::Arena* arena) const final {
+    return CreateMaybeMessage<FindPathByVertexCordRequest>(arena);
   }
   void CopyFrom(const ::google::protobuf::Message& from) final;
   void MergeFrom(const ::google::protobuf::Message& from) final;
-  void CopyFrom(const FindPathByVertexIDRequest& from);
-  void MergeFrom(const FindPathByVertexIDRequest& from);
+  void CopyFrom(const FindPathByVertexCordRequest& from);
+  void MergeFrom(const FindPathByVertexCordRequest& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -393,7 +393,7 @@ class FindPathByVertexIDRequest final :
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(FindPathByVertexIDRequest* other);
+  void InternalSwap(FindPathByVertexCordRequest* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return nullptr;
@@ -423,26 +423,42 @@ class FindPathByVertexIDRequest final :
   ::std::string* release_algo_type();
   void set_allocated_algo_type(::std::string* algo_type);
 
-  // int32 v1_id = 2;
-  void clear_v1_id();
-  static const int kV1IdFieldNumber = 2;
-  ::google::protobuf::int32 v1_id() const;
-  void set_v1_id(::google::protobuf::int32 value);
+  // string v1 = 2;
+  void clear_v1();
+  static const int kV1FieldNumber = 2;
+  const ::std::string& v1() const;
+  void set_v1(const ::std::string& value);
+  #if LANG_CXX11
+  void set_v1(::std::string&& value);
+  #endif
+  void set_v1(const char* value);
+  void set_v1(const char* value, size_t size);
+  ::std::string* mutable_v1();
+  ::std::string* release_v1();
+  void set_allocated_v1(::std::string* v1);
 
-  // int32 v2_id = 3;
-  void clear_v2_id();
-  static const int kV2IdFieldNumber = 3;
-  ::google::protobuf::int32 v2_id() const;
-  void set_v2_id(::google::protobuf::int32 value);
+  // string v2 = 3;
+  void clear_v2();
+  static const int kV2FieldNumber = 3;
+  const ::std::string& v2() const;
+  void set_v2(const ::std::string& value);
+  #if LANG_CXX11
+  void set_v2(::std::string&& value);
+  #endif
+  void set_v2(const char* value);
+  void set_v2(const char* value, size_t size);
+  ::std::string* mutable_v2();
+  ::std::string* release_v2();
+  void set_allocated_v2(::std::string* v2);
 
-  // @@protoc_insertion_point(class_scope:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(class_scope:geodesic_gRPC.FindPathByVertexCordRequest)
  private:
   class HasBitSetters;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::ArenaStringPtr algo_type_;
-  ::google::protobuf::int32 v1_id_;
-  ::google::protobuf::int32 v2_id_;
+  ::google::protobuf::internal::ArenaStringPtr v1_;
+  ::google::protobuf::internal::ArenaStringPtr v2_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_geodesic_2eproto;
 };
@@ -703,87 +719,165 @@ inline void HelloReply::set_allocated_message(::std::string* message) {
 
 // -------------------------------------------------------------------
 
-// FindPathByVertexIDRequest
+// FindPathByVertexCordRequest
 
 // string algo_type = 1;
-inline void FindPathByVertexIDRequest::clear_algo_type() {
+inline void FindPathByVertexCordRequest::clear_algo_type() {
   algo_type_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::std::string& FindPathByVertexIDRequest::algo_type() const {
-  // @@protoc_insertion_point(field_get:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+inline const ::std::string& FindPathByVertexCordRequest::algo_type() const {
+  // @@protoc_insertion_point(field_get:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
   return algo_type_.GetNoArena();
 }
-inline void FindPathByVertexIDRequest::set_algo_type(const ::std::string& value) {
+inline void FindPathByVertexCordRequest::set_algo_type(const ::std::string& value) {
   
   algo_type_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+  // @@protoc_insertion_point(field_set:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
 }
 #if LANG_CXX11
-inline void FindPathByVertexIDRequest::set_algo_type(::std::string&& value) {
+inline void FindPathByVertexCordRequest::set_algo_type(::std::string&& value) {
   
   algo_type_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+  // @@protoc_insertion_point(field_set_rvalue:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
 }
 #endif
-inline void FindPathByVertexIDRequest::set_algo_type(const char* value) {
+inline void FindPathByVertexCordRequest::set_algo_type(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   algo_type_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+  // @@protoc_insertion_point(field_set_char:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
 }
-inline void FindPathByVertexIDRequest::set_algo_type(const char* value, size_t size) {
+inline void FindPathByVertexCordRequest::set_algo_type(const char* value, size_t size) {
   
   algo_type_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+  // @@protoc_insertion_point(field_set_pointer:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
 }
-inline ::std::string* FindPathByVertexIDRequest::mutable_algo_type() {
+inline ::std::string* FindPathByVertexCordRequest::mutable_algo_type() {
   
-  // @@protoc_insertion_point(field_mutable:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+  // @@protoc_insertion_point(field_mutable:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
   return algo_type_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* FindPathByVertexIDRequest::release_algo_type() {
-  // @@protoc_insertion_point(field_release:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+inline ::std::string* FindPathByVertexCordRequest::release_algo_type() {
+  // @@protoc_insertion_point(field_release:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
   
   return algo_type_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void FindPathByVertexIDRequest::set_allocated_algo_type(::std::string* algo_type) {
+inline void FindPathByVertexCordRequest::set_allocated_algo_type(::std::string* algo_type) {
   if (algo_type != nullptr) {
     
   } else {
     
   }
   algo_type_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), algo_type);
-  // @@protoc_insertion_point(field_set_allocated:geodesic_gRPC.FindPathByVertexIDRequest.algo_type)
+  // @@protoc_insertion_point(field_set_allocated:geodesic_gRPC.FindPathByVertexCordRequest.algo_type)
 }
 
-// int32 v1_id = 2;
-inline void FindPathByVertexIDRequest::clear_v1_id() {
-  v1_id_ = 0;
+// string v1 = 2;
+inline void FindPathByVertexCordRequest::clear_v1() {
+  v1_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::google::protobuf::int32 FindPathByVertexIDRequest::v1_id() const {
-  // @@protoc_insertion_point(field_get:geodesic_gRPC.FindPathByVertexIDRequest.v1_id)
-  return v1_id_;
+inline const ::std::string& FindPathByVertexCordRequest::v1() const {
+  // @@protoc_insertion_point(field_get:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+  return v1_.GetNoArena();
 }
-inline void FindPathByVertexIDRequest::set_v1_id(::google::protobuf::int32 value) {
+inline void FindPathByVertexCordRequest::set_v1(const ::std::string& value) {
   
-  v1_id_ = value;
-  // @@protoc_insertion_point(field_set:geodesic_gRPC.FindPathByVertexIDRequest.v1_id)
+  v1_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+}
+#if LANG_CXX11
+inline void FindPathByVertexCordRequest::set_v1(::std::string&& value) {
+  
+  v1_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+}
+#endif
+inline void FindPathByVertexCordRequest::set_v1(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  v1_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+}
+inline void FindPathByVertexCordRequest::set_v1(const char* value, size_t size) {
+  
+  v1_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+}
+inline ::std::string* FindPathByVertexCordRequest::mutable_v1() {
+  
+  // @@protoc_insertion_point(field_mutable:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+  return v1_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* FindPathByVertexCordRequest::release_v1() {
+  // @@protoc_insertion_point(field_release:geodesic_gRPC.FindPathByVertexCordRequest.v1)
+  
+  return v1_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void FindPathByVertexCordRequest::set_allocated_v1(::std::string* v1) {
+  if (v1 != nullptr) {
+    
+  } else {
+    
+  }
+  v1_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), v1);
+  // @@protoc_insertion_point(field_set_allocated:geodesic_gRPC.FindPathByVertexCordRequest.v1)
 }
 
-// int32 v2_id = 3;
-inline void FindPathByVertexIDRequest::clear_v2_id() {
-  v2_id_ = 0;
+// string v2 = 3;
+inline void FindPathByVertexCordRequest::clear_v2() {
+  v2_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::google::protobuf::int32 FindPathByVertexIDRequest::v2_id() const {
-  // @@protoc_insertion_point(field_get:geodesic_gRPC.FindPathByVertexIDRequest.v2_id)
-  return v2_id_;
+inline const ::std::string& FindPathByVertexCordRequest::v2() const {
+  // @@protoc_insertion_point(field_get:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+  return v2_.GetNoArena();
 }
-inline void FindPathByVertexIDRequest::set_v2_id(::google::protobuf::int32 value) {
+inline void FindPathByVertexCordRequest::set_v2(const ::std::string& value) {
   
-  v2_id_ = value;
-  // @@protoc_insertion_point(field_set:geodesic_gRPC.FindPathByVertexIDRequest.v2_id)
+  v2_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+}
+#if LANG_CXX11
+inline void FindPathByVertexCordRequest::set_v2(::std::string&& value) {
+  
+  v2_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+}
+#endif
+inline void FindPathByVertexCordRequest::set_v2(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  v2_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+}
+inline void FindPathByVertexCordRequest::set_v2(const char* value, size_t size) {
+  
+  v2_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+}
+inline ::std::string* FindPathByVertexCordRequest::mutable_v2() {
+  
+  // @@protoc_insertion_point(field_mutable:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+  return v2_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* FindPathByVertexCordRequest::release_v2() {
+  // @@protoc_insertion_point(field_release:geodesic_gRPC.FindPathByVertexCordRequest.v2)
+  
+  return v2_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void FindPathByVertexCordRequest::set_allocated_v2(::std::string* v2) {
+  if (v2 != nullptr) {
+    
+  } else {
+    
+  }
+  v2_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), v2);
+  // @@protoc_insertion_point(field_set_allocated:geodesic_gRPC.FindPathByVertexCordRequest.v2)
 }
 
 // -------------------------------------------------------------------

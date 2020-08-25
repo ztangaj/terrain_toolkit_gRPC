@@ -47,12 +47,12 @@ class Geodesic final {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::HelloReply>>(PrepareAsyncSayHelloRaw(context, request, cq));
     }
     // request shortest path using vertex id
-    virtual ::grpc::Status FindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::geodesic_gRPC::Path* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>> AsyncFindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>>(AsyncFindPathByVertexIDRaw(context, request, cq));
+    virtual ::grpc::Status FindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::geodesic_gRPC::Path* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>> AsyncFindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>>(AsyncFindPathByVertexCordRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>> PrepareAsyncFindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>>(PrepareAsyncFindPathByVertexIDRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>> PrepareAsyncFindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>>(PrepareAsyncFindPathByVertexCordRaw(context, request, cq));
     }
     class experimental_async_interface {
      public:
@@ -61,15 +61,15 @@ class Geodesic final {
       virtual void SayHello(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest* request, ::geodesic_gRPC::HelloReply* response, std::function<void(::grpc::Status)>) = 0;
       virtual void SayHello(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::HelloReply* response, std::function<void(::grpc::Status)>) = 0;
       // request shortest path using vertex id
-      virtual void FindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void FindPathByVertexID(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void FindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void FindPathByVertexCord(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) = 0;
     };
     virtual class experimental_async_interface* experimental_async() { return nullptr; }
   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::HelloReply>* AsyncSayHelloRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::HelloReply>* PrepareAsyncSayHelloRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>* AsyncFindPathByVertexIDRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>* PrepareAsyncFindPathByVertexIDRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>* AsyncFindPathByVertexCordRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::geodesic_gRPC::Path>* PrepareAsyncFindPathByVertexCordRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -81,20 +81,20 @@ class Geodesic final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::HelloReply>> PrepareAsyncSayHello(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::HelloReply>>(PrepareAsyncSayHelloRaw(context, request, cq));
     }
-    ::grpc::Status FindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::geodesic_gRPC::Path* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>> AsyncFindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>>(AsyncFindPathByVertexIDRaw(context, request, cq));
+    ::grpc::Status FindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::geodesic_gRPC::Path* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>> AsyncFindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>>(AsyncFindPathByVertexCordRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>> PrepareAsyncFindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>>(PrepareAsyncFindPathByVertexIDRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>> PrepareAsyncFindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>>(PrepareAsyncFindPathByVertexCordRaw(context, request, cq));
     }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
       void SayHello(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest* request, ::geodesic_gRPC::HelloReply* response, std::function<void(::grpc::Status)>) override;
       void SayHello(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::HelloReply* response, std::function<void(::grpc::Status)>) override;
-      void FindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) override;
-      void FindPathByVertexID(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) override;
+      void FindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) override;
+      void FindPathByVertexCord(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)>) override;
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -108,10 +108,10 @@ class Geodesic final {
     class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::HelloReply>* AsyncSayHelloRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::HelloReply>* PrepareAsyncSayHelloRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* AsyncFindPathByVertexIDRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* PrepareAsyncFindPathByVertexIDRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* AsyncFindPathByVertexCordRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* PrepareAsyncFindPathByVertexCordRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SayHello_;
-    const ::grpc::internal::RpcMethod rpcmethod_FindPathByVertexID_;
+    const ::grpc::internal::RpcMethod rpcmethod_FindPathByVertexCord_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -122,7 +122,7 @@ class Geodesic final {
     // Sends a greeting
     virtual ::grpc::Status SayHello(::grpc::ServerContext* context, const ::geodesic_gRPC::HelloRequest* request, ::geodesic_gRPC::HelloReply* response);
     // request shortest path using vertex id
-    virtual ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response);
+    virtual ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_SayHello : public BaseClass {
@@ -145,26 +145,26 @@ class Geodesic final {
     }
   };
   template <class BaseClass>
-  class WithAsyncMethod_FindPathByVertexID : public BaseClass {
+  class WithAsyncMethod_FindPathByVertexCord : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
-    WithAsyncMethod_FindPathByVertexID() {
+    WithAsyncMethod_FindPathByVertexCord() {
       ::grpc::Service::MarkMethodAsync(1);
     }
-    ~WithAsyncMethod_FindPathByVertexID() override {
+    ~WithAsyncMethod_FindPathByVertexCord() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) override {
+    ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestFindPathByVertexID(::grpc::ServerContext* context, ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::grpc::ServerAsyncResponseWriter< ::geodesic_gRPC::Path>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestFindPathByVertexCord(::grpc::ServerContext* context, ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::grpc::ServerAsyncResponseWriter< ::geodesic_gRPC::Path>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SayHello<WithAsyncMethod_FindPathByVertexID<Service > > AsyncService;
+  typedef WithAsyncMethod_SayHello<WithAsyncMethod_FindPathByVertexCord<Service > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SayHello : public BaseClass {
    private:
@@ -191,31 +191,31 @@ class Geodesic final {
     virtual void SayHello(::grpc::ServerContext* context, const ::geodesic_gRPC::HelloRequest* request, ::geodesic_gRPC::HelloReply* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_FindPathByVertexID : public BaseClass {
+  class ExperimentalWithCallbackMethod_FindPathByVertexCord : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
-    ExperimentalWithCallbackMethod_FindPathByVertexID() {
+    ExperimentalWithCallbackMethod_FindPathByVertexCord() {
       ::grpc::Service::experimental().MarkMethodCallback(1,
-        new ::grpc::internal::CallbackUnaryHandler< ::geodesic_gRPC::FindPathByVertexIDRequest, ::geodesic_gRPC::Path>(
+        new ::grpc::internal::CallbackUnaryHandler< ::geodesic_gRPC::FindPathByVertexCordRequest, ::geodesic_gRPC::Path>(
           [this](::grpc::ServerContext* context,
-                 const ::geodesic_gRPC::FindPathByVertexIDRequest* request,
+                 const ::geodesic_gRPC::FindPathByVertexCordRequest* request,
                  ::geodesic_gRPC::Path* response,
                  ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   return this->FindPathByVertexID(context, request, response, controller);
+                   return this->FindPathByVertexCord(context, request, response, controller);
                  }));
     }
-    ~ExperimentalWithCallbackMethod_FindPathByVertexID() override {
+    ~ExperimentalWithCallbackMethod_FindPathByVertexCord() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) override {
+    ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual void FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
   };
-  typedef ExperimentalWithCallbackMethod_SayHello<ExperimentalWithCallbackMethod_FindPathByVertexID<Service > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SayHello<ExperimentalWithCallbackMethod_FindPathByVertexCord<Service > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SayHello : public BaseClass {
    private:
@@ -234,18 +234,18 @@ class Geodesic final {
     }
   };
   template <class BaseClass>
-  class WithGenericMethod_FindPathByVertexID : public BaseClass {
+  class WithGenericMethod_FindPathByVertexCord : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
-    WithGenericMethod_FindPathByVertexID() {
+    WithGenericMethod_FindPathByVertexCord() {
       ::grpc::Service::MarkMethodGeneric(1);
     }
-    ~WithGenericMethod_FindPathByVertexID() override {
+    ~WithGenericMethod_FindPathByVertexCord() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) override {
+    ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -271,22 +271,22 @@ class Geodesic final {
     }
   };
   template <class BaseClass>
-  class WithRawMethod_FindPathByVertexID : public BaseClass {
+  class WithRawMethod_FindPathByVertexCord : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
-    WithRawMethod_FindPathByVertexID() {
+    WithRawMethod_FindPathByVertexCord() {
       ::grpc::Service::MarkMethodRaw(1);
     }
-    ~WithRawMethod_FindPathByVertexID() override {
+    ~WithRawMethod_FindPathByVertexCord() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) override {
+    ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestFindPathByVertexID(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestFindPathByVertexCord(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
@@ -316,29 +316,29 @@ class Geodesic final {
     virtual void SayHello(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_FindPathByVertexID : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_FindPathByVertexCord : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
-    ExperimentalWithRawCallbackMethod_FindPathByVertexID() {
+    ExperimentalWithRawCallbackMethod_FindPathByVertexCord() {
       ::grpc::Service::experimental().MarkMethodRawCallback(1,
         new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
           [this](::grpc::ServerContext* context,
                  const ::grpc::ByteBuffer* request,
                  ::grpc::ByteBuffer* response,
                  ::grpc::experimental::ServerCallbackRpcController* controller) {
-                   this->FindPathByVertexID(context, request, response, controller);
+                   this->FindPathByVertexCord(context, request, response, controller);
                  }));
     }
-    ~ExperimentalWithRawCallbackMethod_FindPathByVertexID() override {
+    ~ExperimentalWithRawCallbackMethod_FindPathByVertexCord() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) override {
+    ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    virtual void FindPathByVertexID(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
+    virtual void FindPathByVertexCord(::grpc::ServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response, ::grpc::experimental::ServerCallbackRpcController* controller) { controller->Finish(::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "")); }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_SayHello : public BaseClass {
@@ -361,28 +361,28 @@ class Geodesic final {
     virtual ::grpc::Status StreamedSayHello(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::geodesic_gRPC::HelloRequest,::geodesic_gRPC::HelloReply>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_FindPathByVertexID : public BaseClass {
+  class WithStreamedUnaryMethod_FindPathByVertexCord : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service *service) {}
    public:
-    WithStreamedUnaryMethod_FindPathByVertexID() {
+    WithStreamedUnaryMethod_FindPathByVertexCord() {
       ::grpc::Service::MarkMethodStreamed(1,
-        new ::grpc::internal::StreamedUnaryHandler< ::geodesic_gRPC::FindPathByVertexIDRequest, ::geodesic_gRPC::Path>(std::bind(&WithStreamedUnaryMethod_FindPathByVertexID<BaseClass>::StreamedFindPathByVertexID, this, std::placeholders::_1, std::placeholders::_2)));
+        new ::grpc::internal::StreamedUnaryHandler< ::geodesic_gRPC::FindPathByVertexCordRequest, ::geodesic_gRPC::Path>(std::bind(&WithStreamedUnaryMethod_FindPathByVertexCord<BaseClass>::StreamedFindPathByVertexCord, this, std::placeholders::_1, std::placeholders::_2)));
     }
-    ~WithStreamedUnaryMethod_FindPathByVertexID() override {
+    ~WithStreamedUnaryMethod_FindPathByVertexCord() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) override {
+    ::grpc::Status FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedFindPathByVertexID(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::geodesic_gRPC::FindPathByVertexIDRequest,::geodesic_gRPC::Path>* server_unary_streamer) = 0;
+    virtual ::grpc::Status StreamedFindPathByVertexCord(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::geodesic_gRPC::FindPathByVertexCordRequest,::geodesic_gRPC::Path>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_FindPathByVertexID<Service > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_FindPathByVertexCord<Service > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_FindPathByVertexID<Service > > StreamedService;
+  typedef WithStreamedUnaryMethod_SayHello<WithStreamedUnaryMethod_FindPathByVertexCord<Service > > StreamedService;
 };
 
 }  // namespace geodesic_gRPC

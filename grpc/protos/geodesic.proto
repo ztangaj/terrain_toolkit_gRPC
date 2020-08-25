@@ -7,7 +7,7 @@ service Geodesic {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   // request shortest path using vertex id
-  rpc FindPathByVertexID(FindPathByVertexIDRequest) returns (Path) {}
+  rpc FindPathByVertexCord(FindPathByVertexCordRequest) returns (Path) {}
 }
 
 // The request message containing the user's name.
@@ -21,10 +21,10 @@ message HelloReply {
 }
 
 // request shortest path using vertex id
-message FindPathByVertexIDRequest {
+message FindPathByVertexCordRequest {
     string algo_type = 1;
-    int32 v1_id = 2;
-    int32 v2_id = 3;
+    string v1 = 2;
+    string v2 = 3;
 }
 
 // message findPathVertexCordRequest {

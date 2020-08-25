@@ -20,7 +20,7 @@ namespace geodesic_gRPC {
 
 static const char* Geodesic_method_names[] = {
   "/geodesic_gRPC.Geodesic/SayHello",
-  "/geodesic_gRPC.Geodesic/FindPathByVertexID",
+  "/geodesic_gRPC.Geodesic/FindPathByVertexCord",
 };
 
 std::unique_ptr< Geodesic::Stub> Geodesic::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -31,7 +31,7 @@ std::unique_ptr< Geodesic::Stub> Geodesic::NewStub(const std::shared_ptr< ::grpc
 
 Geodesic::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
   : channel_(channel), rpcmethod_SayHello_(Geodesic_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_FindPathByVertexID_(Geodesic_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_FindPathByVertexCord_(Geodesic_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status Geodesic::Stub::SayHello(::grpc::ClientContext* context, const ::geodesic_gRPC::HelloRequest& request, ::geodesic_gRPC::HelloReply* response) {
@@ -54,24 +54,24 @@ void Geodesic::Stub::experimental_async::SayHello(::grpc::ClientContext* context
   return ::grpc::internal::ClientAsyncResponseReaderFactory< ::geodesic_gRPC::HelloReply>::Create(channel_.get(), cq, rpcmethod_SayHello_, context, request, false);
 }
 
-::grpc::Status Geodesic::Stub::FindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::geodesic_gRPC::Path* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_FindPathByVertexID_, context, request, response);
+::grpc::Status Geodesic::Stub::FindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::geodesic_gRPC::Path* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_FindPathByVertexCord_, context, request, response);
 }
 
-void Geodesic::Stub::experimental_async::FindPathByVertexID(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FindPathByVertexID_, context, request, response, std::move(f));
+void Geodesic::Stub::experimental_async::FindPathByVertexCord(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FindPathByVertexCord_, context, request, response, std::move(f));
 }
 
-void Geodesic::Stub::experimental_async::FindPathByVertexID(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)> f) {
-  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FindPathByVertexID_, context, request, response, std::move(f));
+void Geodesic::Stub::experimental_async::FindPathByVertexCord(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::geodesic_gRPC::Path* response, std::function<void(::grpc::Status)> f) {
+  return ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FindPathByVertexCord_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* Geodesic::Stub::AsyncFindPathByVertexIDRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::geodesic_gRPC::Path>::Create(channel_.get(), cq, rpcmethod_FindPathByVertexID_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* Geodesic::Stub::AsyncFindPathByVertexCordRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::geodesic_gRPC::Path>::Create(channel_.get(), cq, rpcmethod_FindPathByVertexCord_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* Geodesic::Stub::PrepareAsyncFindPathByVertexIDRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::geodesic_gRPC::Path>::Create(channel_.get(), cq, rpcmethod_FindPathByVertexID_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::geodesic_gRPC::Path>* Geodesic::Stub::PrepareAsyncFindPathByVertexCordRaw(::grpc::ClientContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::geodesic_gRPC::Path>::Create(channel_.get(), cq, rpcmethod_FindPathByVertexCord_, context, request, false);
 }
 
 Geodesic::Service::Service() {
@@ -83,8 +83,8 @@ Geodesic::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Geodesic_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Geodesic::Service, ::geodesic_gRPC::FindPathByVertexIDRequest, ::geodesic_gRPC::Path>(
-          std::mem_fn(&Geodesic::Service::FindPathByVertexID), this)));
+      new ::grpc::internal::RpcMethodHandler< Geodesic::Service, ::geodesic_gRPC::FindPathByVertexCordRequest, ::geodesic_gRPC::Path>(
+          std::mem_fn(&Geodesic::Service::FindPathByVertexCord), this)));
 }
 
 Geodesic::Service::~Service() {
@@ -97,7 +97,7 @@ Geodesic::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status Geodesic::Service::FindPathByVertexID(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexIDRequest* request, ::geodesic_gRPC::Path* response) {
+::grpc::Status Geodesic::Service::FindPathByVertexCord(::grpc::ServerContext* context, const ::geodesic_gRPC::FindPathByVertexCordRequest* request, ::geodesic_gRPC::Path* response) {
   (void) context;
   (void) request;
   (void) response;

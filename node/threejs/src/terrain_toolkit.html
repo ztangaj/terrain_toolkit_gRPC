@@ -35,8 +35,7 @@
 	</head>
 
 	<body>
-		<input type="file" name="inputfile" id="inputfile"> 
-		<button id="testbtn">Get Path Test</button>
+		<!-- <input type="file" name="inputfile" id="inputfile">  -->
 		<!-- <div id="info">
 		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> Terrain ToolKit
 		</div> -->
@@ -158,17 +157,17 @@
 				faces: "0",
 			};
 
-			var highlightVertex = false;
+			var highlightVertex = true;
 			
 			//TODO: use shader language to determine the max min z value
-			// var terrainMaterial = new THREE.ShaderMaterial({				
-			// 	vertexShader: document.getElementById('vertexShader').textContent,
-			// 	fragmentShader: document.getElementById('fragmentShader').textContent,	
-			// 	wireframe: true,			
-			// });
+			var terrainMaterial = new THREE.ShaderMaterial({				
+				vertexShader: document.getElementById('vertexShader').textContent,
+				fragmentShader: document.getElementById('fragmentShader').textContent,	
+				wireframe: true,			
+			});
 
-			var terrainMaterial = new THREE.MeshNormalMaterial();
-			terrainMaterial.wireframe = true;
+			// var terrainMaterial = new THREE.MeshNormalMaterial();
+			// terrainMaterial.wireframe = true;
 
 			var pointMaterial = new THREE.ShaderMaterial( {
 				uniforms: {
@@ -288,7 +287,7 @@
 				raycaster = new THREE.Raycaster();
 				mouse = new THREE.Vector2();
 
-				renderer.domElement.addEventListener( 'click', onMouseClick, false );
+				renderer.domElement.addEventListener( 'dblclick', onMouseClick, false );
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 			}						
@@ -318,7 +317,7 @@
 					Mesh: {},
 					Line: { threshold: 1 },
 					LOD: {},
-					Points: { threshold: 10 },
+					Points: { threshold: 15 },
 					Sprite: { threshold: 1}
 				}
 			
@@ -379,6 +378,21 @@
 			}
 
 			// helper function
+			function findPath(v1, v2) {
+				if(selectedPoints[0]&&selectedPoints[1]){
+					axios.post('http://localhost:8080/getpath', {
+						v1: v1.x + "," + v1.y + "," +v1.z,
+						v2: v2.x + "," + v2.y + "," +v2.z
+					})
+					.then(function (response) {
+						drawPath(response.data.path);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});
+				}
+			}
+
 			function drawPath(pathStr){
 				var cords = pathStr.split(",");	
 				var points = [];			
@@ -388,7 +402,7 @@
 				}
 				var geometry = new THREE.BufferGeometry().setFromPoints(points);
 				var material = new THREE.LineBasicMaterial({
-					color: 0xff0000,
+					color: 0xffffff,
 					linewidth: 3,
 				});
 
@@ -428,8 +442,8 @@
 					camera: {
 						speed: 0.0001
 					},
-					findPath: function() {
-						// placeholder
+					findPath: function(){
+						findPath(selectedPoints[0], selectedPoints[1])
 					},
 					reset: function() {
 						this.velx = 0.1;
@@ -450,23 +464,23 @@
 				}
 
 				controlPanel = new dat.GUI();
-				var terrainInfo = controlPanel.addFolder('Basic information');
-				terrainInfo.add(options.basicInfo, 'points').name('Number of points');
-				terrainInfo.add(options.basicInfo, 'edges').name('Number of edges');
-				terrainInfo.add(options.basicInfo, 'faces').name('Number of faces');
-				terrainInfo.open();
+				// var terrainInfo = controlPanel.addFolder('Basic information');
+				// terrainInfo.add(options.basicInfo, 'points').name('Number of points');
+				// terrainInfo.add(options.basicInfo, 'edges').name('Number of edges');
+				// terrainInfo.add(options.basicInfo, 'faces').name('Number of faces');
+				// terrainInfo.open();
 
 				var points = controlPanel.addFolder('Selected Points');
 				points.add(options, 'pointA').name('Point A').listen();
 				points.add(options, 'pointB').name('Point B').listen();
 				points.open();
 
-				var algorithms = controlPanel.addFolder('Algorithm');
+				// var algorithms = controlPanel.addFolder('Algorithm');
 				// velocity.add(options, 'velx', -0.2, 0.2).name('X').listen();
 				// velocity.add(options, 'vely', -0.2, 0.2).name('Y').listen();
 				// velocity.open();
 
-				var box = controlPanel.addFolder('Texture');
+				// var box = controlPanel.addFolder('Texture');
 				// box.add(cube.scale, 'x', 0, 3).name('Width').listen();
 				// box.add(cube.scale, 'y', 0, 3).name('Height').listen();
 				// box.add(cube.scale, 'z', 0, 3).name('Length').listen();
@@ -478,22 +492,6 @@
 				}
 				// gui.add(options, 'reset');
 			}
-
-			document.getElementById('testbtn').addEventListener('click', function() {
-				console.log("clicked!");
-				axios({
-					method: 'post',
-					url: 'http://localhost:8080/getpath',
-					data: {
-					}
-				})
-				.then(response=>{
-					drawPath(response.data.path);
-				})
-				.catch(err=>{
-					console.log(err);
-				})			
-			})
 
 			// TODO: 1. change input, maybe not a file
 			document.getElementById('inputfile') .addEventListener('change', function() {
@@ -537,12 +535,6 @@
 				renderer.render( scene, camera );
 			}
 
-			function getObject() {
-				scene.traverse (function (object)
-				{
-					console.log(object);
-				});
-			}
 		</script>
 
 	</body>

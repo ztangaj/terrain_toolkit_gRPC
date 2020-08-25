@@ -40,9 +40,33 @@ using grpc::ServerContext;
 using grpc::Status;
 using geodesic_gRPC::HelloRequest;
 using geodesic_gRPC::HelloReply;
-using geodesic_gRPC::FindPathByVertexIDRequest;
+using geodesic_gRPC::FindPathByVertexCordRequest;
 using geodesic_gRPC::Path;
 using geodesic_gRPC::Geodesic;
+
+geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* mesh){
+  std::string delimiter = ",";
+  size_t pos = 0;
+  std::string token;
+  std::vector<_Float32> cords;
+  geodesic::SurfacePoint result;
+
+  while ((pos = cordStr.find(delimiter)) != std::string::npos) {
+      token = cordStr.substr(0, pos);
+      std::cout << token << std::endl;
+      cordStr.erase(0, pos + delimiter.length());
+      cords.push_back(std::stof(token));
+  }
+
+  for(int i=0; i<mesh->vertices().size();i++){
+      geodesic::SurfacePoint v(&mesh->vertices()[i]);
+      if(v.x()==cords[0] && v.y()==cords[1]){
+          std::cout<<"found match vertex"<<std::endl;        
+          result = v;
+      }
+  }
+  return result;
+}
 
 // Logic and data behind the server's behavior.
 class GeodesicServiceImpl final : public Geodesic::Service {
@@ -52,7 +76,7 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     reply->set_message(prefix + request->name());
     return Status::OK;
   }
-  Status FindPathByVertexID(ServerContext* context, const FindPathByVertexIDRequest* request,
+  Status FindPathByVertexCord(ServerContext* context, const FindPathByVertexCordRequest* request,
                        Path* reply) override {
     bool success = geodesic::read_mesh_from_file("small_terrain.off",points,faces);
 
@@ -65,8 +89,16 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     mesh.initialize_mesh_data(points, faces);		//create internal mesh data structure including edges
 
     geodesic::GeodesicAlgorithmExact algorithm(&mesh);	//create exact algorithm for the mesh
-    geodesic::SurfacePoint source(&mesh.vertices()[5]);
-    geodesic::SurfacePoint destination(&mesh.vertices()[500]);
+
+    // std::cout << request->algo_type() << std::endl;
+    // std::cout << request->v1() << std::endl;
+    // std::cout << request->v2() << std::endl;
+    geodesic::SurfacePoint source = findVertexByCordStr(request->v1(), &mesh);
+    geodesic::SurfacePoint destination = findVertexByCordStr(request->v2(), &mesh);
+
+    // geodesic::SurfacePoint source(&mesh.vertices()[5]);
+    // geodesic::SurfacePoint destination(&mesh.vertices()[500]);
+
     std::vector<geodesic::SurfacePoint> path;
     algorithm.geodesic(source, destination, path);
 

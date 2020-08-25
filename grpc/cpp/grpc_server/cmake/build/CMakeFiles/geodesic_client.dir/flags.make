@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/cmake/build -I/mnt/c/Users/huaxuan/source/repos/terrain_web/cpp/geodesic/grpc/../geodesic -isystem /usr/local/include 
+CXX_INCLUDES = -I/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/cmake/build -I/mnt/c/Users/huaxuan/source/repos/terrain_web/grpc/cpp/grpc_server/../geodesic -isystem /usr/local/include 
 

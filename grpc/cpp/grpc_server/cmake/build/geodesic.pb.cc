@@ -25,10 +25,10 @@ class HelloReplyDefaultTypeInternal {
  public:
   ::google::protobuf::internal::ExplicitlyConstructed<HelloReply> _instance;
 } _HelloReply_default_instance_;
-class FindPathByVertexIDRequestDefaultTypeInternal {
+class FindPathByVertexCordRequestDefaultTypeInternal {
  public:
-  ::google::protobuf::internal::ExplicitlyConstructed<FindPathByVertexIDRequest> _instance;
-} _FindPathByVertexIDRequest_default_instance_;
+  ::google::protobuf::internal::ExplicitlyConstructed<FindPathByVertexCordRequest> _instance;
+} _FindPathByVertexCordRequest_default_instance_;
 class PathDefaultTypeInternal {
  public:
   ::google::protobuf::internal::ExplicitlyConstructed<Path> _instance;
@@ -62,19 +62,19 @@ static void InitDefaultsHelloReply_geodesic_2eproto() {
 ::google::protobuf::internal::SCCInfo<0> scc_info_HelloReply_geodesic_2eproto =
     {{ATOMIC_VAR_INIT(::google::protobuf::internal::SCCInfoBase::kUninitialized), 0, InitDefaultsHelloReply_geodesic_2eproto}, {}};
 
-static void InitDefaultsFindPathByVertexIDRequest_geodesic_2eproto() {
+static void InitDefaultsFindPathByVertexCordRequest_geodesic_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   {
-    void* ptr = &::geodesic_gRPC::_FindPathByVertexIDRequest_default_instance_;
-    new (ptr) ::geodesic_gRPC::FindPathByVertexIDRequest();
+    void* ptr = &::geodesic_gRPC::_FindPathByVertexCordRequest_default_instance_;
+    new (ptr) ::geodesic_gRPC::FindPathByVertexCordRequest();
     ::google::protobuf::internal::OnShutdownDestroyMessage(ptr);
   }
-  ::geodesic_gRPC::FindPathByVertexIDRequest::InitAsDefaultInstance();
+  ::geodesic_gRPC::FindPathByVertexCordRequest::InitAsDefaultInstance();
 }
 
-::google::protobuf::internal::SCCInfo<0> scc_info_FindPathByVertexIDRequest_geodesic_2eproto =
-    {{ATOMIC_VAR_INIT(::google::protobuf::internal::SCCInfoBase::kUninitialized), 0, InitDefaultsFindPathByVertexIDRequest_geodesic_2eproto}, {}};
+::google::protobuf::internal::SCCInfo<0> scc_info_FindPathByVertexCordRequest_geodesic_2eproto =
+    {{ATOMIC_VAR_INIT(::google::protobuf::internal::SCCInfoBase::kUninitialized), 0, InitDefaultsFindPathByVertexCordRequest_geodesic_2eproto}, {}};
 
 static void InitDefaultsPath_geodesic_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -93,7 +93,7 @@ static void InitDefaultsPath_geodesic_2eproto() {
 void InitDefaults_geodesic_2eproto() {
   ::google::protobuf::internal::InitSCC(&scc_info_HelloRequest_geodesic_2eproto.base);
   ::google::protobuf::internal::InitSCC(&scc_info_HelloReply_geodesic_2eproto.base);
-  ::google::protobuf::internal::InitSCC(&scc_info_FindPathByVertexIDRequest_geodesic_2eproto.base);
+  ::google::protobuf::internal::InitSCC(&scc_info_FindPathByVertexCordRequest_geodesic_2eproto.base);
   ::google::protobuf::internal::InitSCC(&scc_info_Path_geodesic_2eproto.base);
 }
 
@@ -115,13 +115,13 @@ const ::google::protobuf::uint32 TableStruct_geodesic_2eproto::offsets[] PROTOBU
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::HelloReply, message_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexIDRequest, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexCordRequest, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexIDRequest, algo_type_),
-  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexIDRequest, v1_id_),
-  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexIDRequest, v2_id_),
+  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexCordRequest, algo_type_),
+  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexCordRequest, v1_),
+  PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::FindPathByVertexCordRequest, v2_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::geodesic_gRPC::Path, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -133,14 +133,14 @@ const ::google::protobuf::uint32 TableStruct_geodesic_2eproto::offsets[] PROTOBU
 static const ::google::protobuf::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::geodesic_gRPC::HelloRequest)},
   { 6, -1, sizeof(::geodesic_gRPC::HelloReply)},
-  { 12, -1, sizeof(::geodesic_gRPC::FindPathByVertexIDRequest)},
+  { 12, -1, sizeof(::geodesic_gRPC::FindPathByVertexCordRequest)},
   { 20, -1, sizeof(::geodesic_gRPC::Path)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
   reinterpret_cast<const ::google::protobuf::Message*>(&::geodesic_gRPC::_HelloRequest_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&::geodesic_gRPC::_HelloReply_default_instance_),
-  reinterpret_cast<const ::google::protobuf::Message*>(&::geodesic_gRPC::_FindPathByVertexIDRequest_default_instance_),
+  reinterpret_cast<const ::google::protobuf::Message*>(&::geodesic_gRPC::_FindPathByVertexCordRequest_default_instance_),
   reinterpret_cast<const ::google::protobuf::Message*>(&::geodesic_gRPC::_Path_default_instance_),
 };
 
@@ -153,13 +153,13 @@ static ::google::protobuf::Message const * const file_default_instances[] = {
 const char descriptor_table_protodef_geodesic_2eproto[] =
   "\n\016geodesic.proto\022\rgeodesic_gRPC\"\034\n\014Hello"
   "Request\022\014\n\004name\030\001 \001(\t\"\035\n\nHelloReply\022\017\n\007m"
-  "essage\030\001 \001(\t\"L\n\031FindPathByVertexIDReques"
-  "t\022\021\n\talgo_type\030\001 \001(\t\022\r\n\005v1_id\030\002 \001(\005\022\r\n\005v"
-  "2_id\030\003 \001(\005\"%\n\004Path\022\014\n\004path\030\001 \003(\002\022\017\n\007mess"
-  "age\030\002 \001(\t2\247\001\n\010Geodesic\022D\n\010SayHello\022\033.geo"
-  "desic_gRPC.HelloRequest\032\031.geodesic_gRPC."
-  "HelloReply\"\000\022U\n\022FindPathByVertexID\022(.geo"
-  "desic_gRPC.FindPathByVertexIDRequest\032\023.g"
+  "essage\030\001 \001(\t\"H\n\033FindPathByVertexCordRequ"
+  "est\022\021\n\talgo_type\030\001 \001(\t\022\n\n\002v1\030\002 \001(\t\022\n\n\002v2"
+  "\030\003 \001(\t\"%\n\004Path\022\014\n\004path\030\001 \003(\002\022\017\n\007message\030"
+  "\002 \001(\t2\253\001\n\010Geodesic\022D\n\010SayHello\022\033.geodesi"
+  "c_gRPC.HelloRequest\032\031.geodesic_gRPC.Hell"
+  "oReply\"\000\022Y\n\024FindPathByVertexCord\022*.geode"
+  "sic_gRPC.FindPathByVertexCordRequest\032\023.g"
   "eodesic_gRPC.Path\"\000b\006proto3"
   ;
 ::google::protobuf::internal::DescriptorTable descriptor_table_geodesic_2eproto = {
@@ -775,24 +775,24 @@ void HelloReply::InternalSwap(HelloReply* other) {
 
 // ===================================================================
 
-void FindPathByVertexIDRequest::InitAsDefaultInstance() {
+void FindPathByVertexCordRequest::InitAsDefaultInstance() {
 }
-class FindPathByVertexIDRequest::HasBitSetters {
+class FindPathByVertexCordRequest::HasBitSetters {
  public:
 };
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const int FindPathByVertexIDRequest::kAlgoTypeFieldNumber;
-const int FindPathByVertexIDRequest::kV1IdFieldNumber;
-const int FindPathByVertexIDRequest::kV2IdFieldNumber;
+const int FindPathByVertexCordRequest::kAlgoTypeFieldNumber;
+const int FindPathByVertexCordRequest::kV1FieldNumber;
+const int FindPathByVertexCordRequest::kV2FieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
-FindPathByVertexIDRequest::FindPathByVertexIDRequest()
+FindPathByVertexCordRequest::FindPathByVertexCordRequest()
   : ::google::protobuf::Message(), _internal_metadata_(nullptr) {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(constructor:geodesic_gRPC.FindPathByVertexCordRequest)
 }
-FindPathByVertexIDRequest::FindPathByVertexIDRequest(const FindPathByVertexIDRequest& from)
+FindPathByVertexCordRequest::FindPathByVertexCordRequest(const FindPathByVertexCordRequest& from)
   : ::google::protobuf::Message(),
       _internal_metadata_(nullptr) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
@@ -800,56 +800,61 @@ FindPathByVertexIDRequest::FindPathByVertexIDRequest(const FindPathByVertexIDReq
   if (from.algo_type().size() > 0) {
     algo_type_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.algo_type_);
   }
-  ::memcpy(&v1_id_, &from.v1_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&v2_id_) -
-    reinterpret_cast<char*>(&v1_id_)) + sizeof(v2_id_));
-  // @@protoc_insertion_point(copy_constructor:geodesic_gRPC.FindPathByVertexIDRequest)
+  v1_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.v1().size() > 0) {
+    v1_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.v1_);
+  }
+  v2_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.v2().size() > 0) {
+    v2_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.v2_);
+  }
+  // @@protoc_insertion_point(copy_constructor:geodesic_gRPC.FindPathByVertexCordRequest)
 }
 
-void FindPathByVertexIDRequest::SharedCtor() {
+void FindPathByVertexCordRequest::SharedCtor() {
   ::google::protobuf::internal::InitSCC(
-      &scc_info_FindPathByVertexIDRequest_geodesic_2eproto.base);
+      &scc_info_FindPathByVertexCordRequest_geodesic_2eproto.base);
   algo_type_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  ::memset(&v1_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&v2_id_) -
-      reinterpret_cast<char*>(&v1_id_)) + sizeof(v2_id_));
+  v1_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  v2_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
-FindPathByVertexIDRequest::~FindPathByVertexIDRequest() {
-  // @@protoc_insertion_point(destructor:geodesic_gRPC.FindPathByVertexIDRequest)
+FindPathByVertexCordRequest::~FindPathByVertexCordRequest() {
+  // @@protoc_insertion_point(destructor:geodesic_gRPC.FindPathByVertexCordRequest)
   SharedDtor();
 }
 
-void FindPathByVertexIDRequest::SharedDtor() {
+void FindPathByVertexCordRequest::SharedDtor() {
   algo_type_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  v1_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  v2_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
-void FindPathByVertexIDRequest::SetCachedSize(int size) const {
+void FindPathByVertexCordRequest::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
-const FindPathByVertexIDRequest& FindPathByVertexIDRequest::default_instance() {
-  ::google::protobuf::internal::InitSCC(&::scc_info_FindPathByVertexIDRequest_geodesic_2eproto.base);
+const FindPathByVertexCordRequest& FindPathByVertexCordRequest::default_instance() {
+  ::google::protobuf::internal::InitSCC(&::scc_info_FindPathByVertexCordRequest_geodesic_2eproto.base);
   return *internal_default_instance();
 }
 
 
-void FindPathByVertexIDRequest::Clear() {
-// @@protoc_insertion_point(message_clear_start:geodesic_gRPC.FindPathByVertexIDRequest)
+void FindPathByVertexCordRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:geodesic_gRPC.FindPathByVertexCordRequest)
   ::google::protobuf::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   algo_type_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  ::memset(&v1_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&v2_id_) -
-      reinterpret_cast<char*>(&v1_id_)) + sizeof(v2_id_));
+  v1_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  v2_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   _internal_metadata_.Clear();
 }
 
 #if GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-const char* FindPathByVertexIDRequest::_InternalParse(const char* begin, const char* end, void* object,
+const char* FindPathByVertexCordRequest::_InternalParse(const char* begin, const char* end, void* object,
                   ::google::protobuf::internal::ParseContext* ctx) {
-  auto msg = static_cast<FindPathByVertexIDRequest*>(object);
+  auto msg = static_cast<FindPathByVertexCordRequest*>(object);
   ::google::protobuf::int32 size; (void)size;
   int depth; (void)depth;
   ::google::protobuf::uint32 tag;
@@ -864,7 +869,7 @@ const char* FindPathByVertexIDRequest::_InternalParse(const char* begin, const c
         if (static_cast<::google::protobuf::uint8>(tag) != 10) goto handle_unusual;
         ptr = ::google::protobuf::io::ReadSize(ptr, &size);
         GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
-        ctx->extra_parse_data().SetFieldName("geodesic_gRPC.FindPathByVertexIDRequest.algo_type");
+        ctx->extra_parse_data().SetFieldName("geodesic_gRPC.FindPathByVertexCordRequest.algo_type");
         object = msg->mutable_algo_type();
         if (size > end - ptr + ::google::protobuf::internal::ParseContext::kSlopBytes) {
           parser_till_end = ::google::protobuf::internal::GreedyStringParserUTF8;
@@ -875,18 +880,36 @@ const char* FindPathByVertexIDRequest::_InternalParse(const char* begin, const c
         ptr += size;
         break;
       }
-      // int32 v1_id = 2;
+      // string v1 = 2;
       case 2: {
-        if (static_cast<::google::protobuf::uint8>(tag) != 16) goto handle_unusual;
-        msg->set_v1_id(::google::protobuf::internal::ReadVarint(&ptr));
+        if (static_cast<::google::protobuf::uint8>(tag) != 18) goto handle_unusual;
+        ptr = ::google::protobuf::io::ReadSize(ptr, &size);
         GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
+        ctx->extra_parse_data().SetFieldName("geodesic_gRPC.FindPathByVertexCordRequest.v1");
+        object = msg->mutable_v1();
+        if (size > end - ptr + ::google::protobuf::internal::ParseContext::kSlopBytes) {
+          parser_till_end = ::google::protobuf::internal::GreedyStringParserUTF8;
+          goto string_till_end;
+        }
+        GOOGLE_PROTOBUF_PARSER_ASSERT(::google::protobuf::internal::StringCheckUTF8(ptr, size, ctx));
+        ::google::protobuf::internal::InlineGreedyStringParser(object, ptr, size, ctx);
+        ptr += size;
         break;
       }
-      // int32 v2_id = 3;
+      // string v2 = 3;
       case 3: {
-        if (static_cast<::google::protobuf::uint8>(tag) != 24) goto handle_unusual;
-        msg->set_v2_id(::google::protobuf::internal::ReadVarint(&ptr));
+        if (static_cast<::google::protobuf::uint8>(tag) != 26) goto handle_unusual;
+        ptr = ::google::protobuf::io::ReadSize(ptr, &size);
         GOOGLE_PROTOBUF_PARSER_ASSERT(ptr);
+        ctx->extra_parse_data().SetFieldName("geodesic_gRPC.FindPathByVertexCordRequest.v2");
+        object = msg->mutable_v2();
+        if (size > end - ptr + ::google::protobuf::internal::ParseContext::kSlopBytes) {
+          parser_till_end = ::google::protobuf::internal::GreedyStringParserUTF8;
+          goto string_till_end;
+        }
+        GOOGLE_PROTOBUF_PARSER_ASSERT(::google::protobuf::internal::StringCheckUTF8(ptr, size, ctx));
+        ::google::protobuf::internal::InlineGreedyStringParser(object, ptr, size, ctx);
+        ptr += size;
         break;
       }
       default: {
@@ -913,11 +936,11 @@ len_delim_till_end:
                                {parser_till_end, object}, size);
 }
 #else  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
-bool FindPathByVertexIDRequest::MergePartialFromCodedStream(
+bool FindPathByVertexCordRequest::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!PROTOBUF_PREDICT_TRUE(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(parse_start:geodesic_gRPC.FindPathByVertexCordRequest)
   for (;;) {
     ::std::pair<::google::protobuf::uint32, bool> p = input->ReadTagWithCutoffNoLastTag(127u);
     tag = p.first;
@@ -931,33 +954,37 @@ bool FindPathByVertexIDRequest::MergePartialFromCodedStream(
           DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
             this->algo_type().data(), static_cast<int>(this->algo_type().length()),
             ::google::protobuf::internal::WireFormatLite::PARSE,
-            "geodesic_gRPC.FindPathByVertexIDRequest.algo_type"));
+            "geodesic_gRPC.FindPathByVertexCordRequest.algo_type"));
         } else {
           goto handle_unusual;
         }
         break;
       }
 
-      // int32 v1_id = 2;
+      // string v1 = 2;
       case 2: {
-        if (static_cast< ::google::protobuf::uint8>(tag) == (16 & 0xFF)) {
-
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &v1_id_)));
+        if (static_cast< ::google::protobuf::uint8>(tag) == (18 & 0xFF)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_v1()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->v1().data(), static_cast<int>(this->v1().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "geodesic_gRPC.FindPathByVertexCordRequest.v1"));
         } else {
           goto handle_unusual;
         }
         break;
       }
 
-      // int32 v2_id = 3;
+      // string v2 = 3;
       case 3: {
-        if (static_cast< ::google::protobuf::uint8>(tag) == (24 & 0xFF)) {
-
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &v2_id_)));
+        if (static_cast< ::google::protobuf::uint8>(tag) == (26 & 0xFF)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_v2()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->v2().data(), static_cast<int>(this->v2().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "geodesic_gRPC.FindPathByVertexCordRequest.v2"));
         } else {
           goto handle_unusual;
         }
@@ -976,18 +1003,18 @@ bool FindPathByVertexIDRequest::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(parse_success:geodesic_gRPC.FindPathByVertexCordRequest)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(parse_failure:geodesic_gRPC.FindPathByVertexCordRequest)
   return false;
 #undef DO_
 }
 #endif  // GOOGLE_PROTOBUF_ENABLE_EXPERIMENTAL_PARSER
 
-void FindPathByVertexIDRequest::SerializeWithCachedSizes(
+void FindPathByVertexCordRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(serialize_start:geodesic_gRPC.FindPathByVertexCordRequest)
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -996,31 +1023,41 @@ void FindPathByVertexIDRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->algo_type().data(), static_cast<int>(this->algo_type().length()),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "geodesic_gRPC.FindPathByVertexIDRequest.algo_type");
+      "geodesic_gRPC.FindPathByVertexCordRequest.algo_type");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       1, this->algo_type(), output);
   }
 
-  // int32 v1_id = 2;
-  if (this->v1_id() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->v1_id(), output);
+  // string v1 = 2;
+  if (this->v1().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->v1().data(), static_cast<int>(this->v1().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "geodesic_gRPC.FindPathByVertexCordRequest.v1");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      2, this->v1(), output);
   }
 
-  // int32 v2_id = 3;
-  if (this->v2_id() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->v2_id(), output);
+  // string v2 = 3;
+  if (this->v2().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->v2().data(), static_cast<int>(this->v2().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "geodesic_gRPC.FindPathByVertexCordRequest.v2");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      3, this->v2(), output);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(serialize_end:geodesic_gRPC.FindPathByVertexCordRequest)
 }
 
-::google::protobuf::uint8* FindPathByVertexIDRequest::InternalSerializeWithCachedSizesToArray(
+::google::protobuf::uint8* FindPathByVertexCordRequest::InternalSerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(serialize_to_array_start:geodesic_gRPC.FindPathByVertexCordRequest)
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -1029,32 +1066,44 @@ void FindPathByVertexIDRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
       this->algo_type().data(), static_cast<int>(this->algo_type().length()),
       ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "geodesic_gRPC.FindPathByVertexIDRequest.algo_type");
+      "geodesic_gRPC.FindPathByVertexCordRequest.algo_type");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         1, this->algo_type(), target);
   }
 
-  // int32 v1_id = 2;
-  if (this->v1_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->v1_id(), target);
+  // string v1 = 2;
+  if (this->v1().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->v1().data(), static_cast<int>(this->v1().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "geodesic_gRPC.FindPathByVertexCordRequest.v1");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->v1(), target);
   }
 
-  // int32 v2_id = 3;
-  if (this->v2_id() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->v2_id(), target);
+  // string v2 = 3;
+  if (this->v2().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->v2().data(), static_cast<int>(this->v2().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "geodesic_gRPC.FindPathByVertexCordRequest.v2");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->v2(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(serialize_to_array_end:geodesic_gRPC.FindPathByVertexCordRequest)
   return target;
 }
 
-size_t FindPathByVertexIDRequest::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:geodesic_gRPC.FindPathByVertexIDRequest)
+size_t FindPathByVertexCordRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:geodesic_gRPC.FindPathByVertexCordRequest)
   size_t total_size = 0;
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -1073,18 +1122,18 @@ size_t FindPathByVertexIDRequest::ByteSizeLong() const {
         this->algo_type());
   }
 
-  // int32 v1_id = 2;
-  if (this->v1_id() != 0) {
+  // string v1 = 2;
+  if (this->v1().size() > 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->v1_id());
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->v1());
   }
 
-  // int32 v2_id = 3;
-  if (this->v2_id() != 0) {
+  // string v2 = 3;
+  if (this->v2().size() > 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->v2_id());
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->v2());
   }
 
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
@@ -1092,23 +1141,23 @@ size_t FindPathByVertexIDRequest::ByteSizeLong() const {
   return total_size;
 }
 
-void FindPathByVertexIDRequest::MergeFrom(const ::google::protobuf::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:geodesic_gRPC.FindPathByVertexIDRequest)
+void FindPathByVertexCordRequest::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:geodesic_gRPC.FindPathByVertexCordRequest)
   GOOGLE_DCHECK_NE(&from, this);
-  const FindPathByVertexIDRequest* source =
-      ::google::protobuf::DynamicCastToGenerated<FindPathByVertexIDRequest>(
+  const FindPathByVertexCordRequest* source =
+      ::google::protobuf::DynamicCastToGenerated<FindPathByVertexCordRequest>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:geodesic_gRPC.FindPathByVertexCordRequest)
     ::google::protobuf::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:geodesic_gRPC.FindPathByVertexIDRequest)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:geodesic_gRPC.FindPathByVertexCordRequest)
     MergeFrom(*source);
   }
 }
 
-void FindPathByVertexIDRequest::MergeFrom(const FindPathByVertexIDRequest& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:geodesic_gRPC.FindPathByVertexIDRequest)
+void FindPathByVertexCordRequest::MergeFrom(const FindPathByVertexCordRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:geodesic_gRPC.FindPathByVertexCordRequest)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   ::google::protobuf::uint32 cached_has_bits = 0;
@@ -1118,46 +1167,50 @@ void FindPathByVertexIDRequest::MergeFrom(const FindPathByVertexIDRequest& from)
 
     algo_type_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.algo_type_);
   }
-  if (from.v1_id() != 0) {
-    set_v1_id(from.v1_id());
+  if (from.v1().size() > 0) {
+
+    v1_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.v1_);
   }
-  if (from.v2_id() != 0) {
-    set_v2_id(from.v2_id());
+  if (from.v2().size() > 0) {
+
+    v2_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.v2_);
   }
 }
 
-void FindPathByVertexIDRequest::CopyFrom(const ::google::protobuf::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:geodesic_gRPC.FindPathByVertexIDRequest)
+void FindPathByVertexCordRequest::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:geodesic_gRPC.FindPathByVertexCordRequest)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void FindPathByVertexIDRequest::CopyFrom(const FindPathByVertexIDRequest& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:geodesic_gRPC.FindPathByVertexIDRequest)
+void FindPathByVertexCordRequest::CopyFrom(const FindPathByVertexCordRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:geodesic_gRPC.FindPathByVertexCordRequest)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool FindPathByVertexIDRequest::IsInitialized() const {
+bool FindPathByVertexCordRequest::IsInitialized() const {
   return true;
 }
 
-void FindPathByVertexIDRequest::Swap(FindPathByVertexIDRequest* other) {
+void FindPathByVertexCordRequest::Swap(FindPathByVertexCordRequest* other) {
   if (other == this) return;
   InternalSwap(other);
 }
-void FindPathByVertexIDRequest::InternalSwap(FindPathByVertexIDRequest* other) {
+void FindPathByVertexCordRequest::InternalSwap(FindPathByVertexCordRequest* other) {
   using std::swap;
   _internal_metadata_.Swap(&other->_internal_metadata_);
   algo_type_.Swap(&other->algo_type_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
-  swap(v1_id_, other->v1_id_);
-  swap(v2_id_, other->v2_id_);
+  v1_.Swap(&other->v1_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+    GetArenaNoVirtual());
+  v2_.Swap(&other->v2_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+    GetArenaNoVirtual());
 }
 
-::google::protobuf::Metadata FindPathByVertexIDRequest::GetMetadata() const {
+::google::protobuf::Metadata FindPathByVertexCordRequest::GetMetadata() const {
   ::google::protobuf::internal::AssignDescriptors(&::assign_descriptors_table_geodesic_2eproto);
   return ::file_level_metadata_geodesic_2eproto[kIndexInFileMessages];
 }
@@ -1548,8 +1601,8 @@ template<> PROTOBUF_NOINLINE ::geodesic_gRPC::HelloRequest* Arena::CreateMaybeMe
 template<> PROTOBUF_NOINLINE ::geodesic_gRPC::HelloReply* Arena::CreateMaybeMessage< ::geodesic_gRPC::HelloReply >(Arena* arena) {
   return Arena::CreateInternal< ::geodesic_gRPC::HelloReply >(arena);
 }
-template<> PROTOBUF_NOINLINE ::geodesic_gRPC::FindPathByVertexIDRequest* Arena::CreateMaybeMessage< ::geodesic_gRPC::FindPathByVertexIDRequest >(Arena* arena) {
-  return Arena::CreateInternal< ::geodesic_gRPC::FindPathByVertexIDRequest >(arena);
+template<> PROTOBUF_NOINLINE ::geodesic_gRPC::FindPathByVertexCordRequest* Arena::CreateMaybeMessage< ::geodesic_gRPC::FindPathByVertexCordRequest >(Arena* arena) {
+  return Arena::CreateInternal< ::geodesic_gRPC::FindPathByVertexCordRequest >(arena);
 }
 template<> PROTOBUF_NOINLINE ::geodesic_gRPC::Path* Arena::CreateMaybeMessage< ::geodesic_gRPC::Path >(Arena* arena) {
   return Arena::CreateInternal< ::geodesic_gRPC::Path >(arena);

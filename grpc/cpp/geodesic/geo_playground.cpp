@@ -8,6 +8,9 @@
 #include <sstream>
 #include <sys/times.h>
 #include "geodesic_algorithm_subdivision.h"
+#include "geodesic_mesh_elements.h"
+#include "geodesic_memory.h"
+#include "geodesic_constants_and_simple_functions.h"
 
 int main(int argc, char **argv) 
 {
@@ -31,19 +34,38 @@ int main(int argc, char **argv)
 
     geodesic::GeodesicAlgorithmExact algorithm(&mesh);	//create exact algorithm for the mesh
 
-    geodesic::SurfacePoint source(&mesh.vertices()[atol(argv[2])]);
-    geodesic::SurfacePoint destination(&mesh.vertices()[atol(argv[3])]);
-    std::vector<geodesic::SurfacePoint> path;
+    // geodesic::SurfacePoint source(&mesh.vertices()[atol(argv[2])]);
 
-    algorithm.geodesic(source, destination, path);
-
-    print_info_about_path(path);
-    std::cout.width(12);
-    std::cout.precision(10);
-    for(unsigned i = 0; i<path.size(); ++i)
-    {
-        geodesic::SurfacePoint& s = path[i];
-        
-        std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
+    // point, mesh, find nearest vertex
+    // geodesic::MeshElementBase base = geodesic::MeshElementBase();
+    // geodesic::SurfacePoint source(&base, 589230,5213190,1406, geodesic::VERTEX);
+    for(int i=0; i<mesh.vertices().size();i++){
+        geodesic::Vertex v = mesh.vertices()[i];
+        if(v.x()==589230 && v.y()==5213190){
+            std::cout<<"found match vertex"<<std::endl;
+        }
     }
+    // std::cout << source.x() << "\t" << source.y() << "\t" << source.z() << std::endl;
+    // std::vector<geodesic::Vertex*> storage;
+
+    // mesh.closest_vertices(&source, &storage);
+    // for(unsigned i = 0; i<storage.size(); ++i){
+    //     geodesic::Vertex& s = *storage[i];
+    //     std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
+    
+    // }
+    // geodesic::SurfacePoint destination(&mesh.vertices()[atol(argv[3])]);
+    // std::vector<geodesic::SurfacePoint> path;
+
+    // algorithm.geodesic(source, destination, path);
+
+    // print_info_about_path(path);
+    // std::cout.width(12);
+    // std::cout.precision(10);
+    // for(unsigned i = 0; i<path.size(); ++i)
+    // {
+    //     geodesic::SurfacePoint& s = path[i];
+        
+    //     std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
+    // }
 }
