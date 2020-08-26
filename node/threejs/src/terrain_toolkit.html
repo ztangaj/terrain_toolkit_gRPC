@@ -35,7 +35,7 @@
 	</head>
 
 	<body>
-		<!-- <input type="file" name="inputfile" id="inputfile">  -->
+		<input type="file" name="inputfile" id="inputfile"> 
 		<!-- <div id="info">
 		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> Terrain ToolKit
 		</div> -->
@@ -48,84 +48,48 @@
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec3 vUv;
-			varying float max_z;
-			varying float min_z;
-			
-			bool isNan(float val)
-			{
-				return (val <= 0.0 || 0.0 <= val) ? false : true;
-			}			
-			
+			varying vec3 vUv;				
 			void main() {
 				vUv = position;
-				if(isNan(max_z)) {
-					max_z = position.z;
-				};
-				if(isNan(min_z)) {
-					min_z = position.z;
-				};
-				if(position.z > max_z) {
-					max_z = position.z;
-				};
-				if(position.z < min_z){
-					min_z = position.z;
-				};
 				vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
 				gl_Position = projectionMatrix * modelViewPosition;
 			}
 		</script>
 
 		<script type="x-shader/x-fragmant" id="fragmentShader">
-			varying float min_z;
-			varying float max_z;
+			float min_z = MIN_Z;
+			float max_z = MAX_Z;
 			varying vec3 vUv;
 			void main(){
-				float r = (vUv.z - 1263.0)/(1545.0-1263.0);
+				float r = (vUv.z - min_z)/(max_z - min_z);
 				gl_FragColor = vec4(r, 1.0-r, 0.0, 1.0);
 			}
 		</script>
-		<!-- for points -->
-		<script type="x-shader/x-vertex" id="vertexshaderPt">
-
-			attribute float size;
-			attribute vec3 customColor;
-
-			varying vec3 vColor;
-
-			void main() {
-
-				vColor = customColor;
-
-				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-
-				gl_PointSize = size * ( 300.0 / -mvPosition.z );
-
-				gl_Position = projectionMatrix * mvPosition;
-
-			}
-
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentshaderPt">
-
-			uniform vec3 color;
-			uniform sampler2D texture;
-
-			varying vec3 vColor;
-
-			void main() {
-
-				gl_FragColor = vec4( color * vColor, 1.0 );
-
-				gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-
-				if ( gl_FragColor.a < ALPHATEST ) discard;
-
-			}
-
-		</script>
-
+		
+		<!-- for add sprit on vertex points
+			<script type="x-shader/x-vertex" id="vertexshaderPt">
+				attribute float size;
+				attribute vec3 customColor;
+				varying vec3 vColor;
+				void main() {
+					vColor = customColor;
+					vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+					gl_PointSize = size * ( 300.0 / -mvPosition.z );
+					gl_Position = projectionMatrix * mvPosition;
+				}
+			</script>
+			<script type="x-shader/x-fragment" id="fragmentshaderPt">
+				uniform vec3 color;
+				uniform sampler2D texture;
+				varying vec3 vColor;
+				void main() {
+					gl_FragColor = vec4( color * vColor, 1.0 );
+					gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+					if ( gl_FragColor.a < ALPHATEST ) discard;
+				}
+			</script>
+		 -->
+	
 		<script>			
 			if ( WEBGL.isWebGLAvailable() === false ) {
 				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
@@ -159,26 +123,26 @@
 
 			var highlightVertex = true;
 			
-			//TODO: use shader language to determine the max min z value
-			var terrainMaterial = new THREE.ShaderMaterial({				
-				vertexShader: document.getElementById('vertexShader').textContent,
-				fragmentShader: document.getElementById('fragmentShader').textContent,	
-				wireframe: true,			
-			});
+			//TODO: done in the generateMaterial function
+			// var terrainMaterial = new THREE.ShaderMaterial({				
+			// 	vertexShader: document.getElementById('vertexShader').textContent,
+			// 	fragmentShader: document.getElementById('fragmentShader').textContent,	
+			// 	wireframe: true,			
+			// });
 
 			// var terrainMaterial = new THREE.MeshNormalMaterial();
 			// terrainMaterial.wireframe = true;
 
-			var pointMaterial = new THREE.ShaderMaterial( {
-				uniforms: {
-					color: { value: new THREE.Color( 0xffffff ) },
-					texture: { value: new THREE.TextureLoader().load( "textures/sprites/ball.png" ) }
-				},
-				vertexShader: document.getElementById( 'vertexshaderPt' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentshaderPt' ).textContent,
+			// var pointMaterial = new THREE.ShaderMaterial( {
+			// 	uniforms: {
+			// 		color: { value: new THREE.Color( 0xffffff ) },
+			// 		texture: { value: new THREE.TextureLoader().load( "textures/sprites/ball.png" ) }
+			// 	},
+			// 	vertexShader: document.getElementById( 'vertexshaderPt' ).textContent,
+			// 	fragmentShader: document.getElementById( 'fragmentshaderPt' ).textContent,
 
-				alphaTest: 0.9
-			} );
+			// 	alphaTest: 0.9
+			// } );
 
 			init();			
 			animate();	
@@ -232,10 +196,10 @@
 						geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
 						geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
 
-						particles = new THREE.Points( geometry, pointMaterial );
-
-						particles.name = "points";
-						scene.add( particles );
+						// deprecated, don't use sprit for vertex now
+						// particles = new THREE.Points( geometry, pointMaterial );
+						// particles.name = "points";
+						// scene.add( particles );
 
 						terrainInfo.points = vertices.length;
 						refreshControlPanel();
@@ -265,7 +229,7 @@
 						console.log(child);
 						if(child.isMesh) {
 							console.log(child.geometry.faces);
-							child.material = terrainMaterial;							
+							child.material = generateMaterial(object);							
 							vertices = child.geometry.attributes.position.array;
 						};
 					} );
@@ -291,6 +255,22 @@
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 			}						
+
+			function generateMaterial(object) {				
+				var boundingbox = new THREE.Box3();
+				boundingbox.setFromObject(object);
+				var max_z = boundingbox.max.z;
+				var min_z = boundingbox.min.z;
+				var fragment_shader = document.getElementById('fragmentShader').textContent;
+				var new_shader = fragment_shader.replace("MAX_Z", max_z.toFixed(1));
+				new_shader = new_shader.replace("MIN_Z", min_z.toFixed(1));
+				var newMaterial = new THREE.ShaderMaterial({				
+					vertexShader: document.getElementById('vertexShader').textContent,
+					fragmentShader: new_shader,	
+					wireframe: true,			
+				});
+				return newMaterial;
+			}
 
 			// on mouse click, get the vertice clicked and high light
 			function setVertexSize(attributes, index, scale) {
@@ -413,6 +393,7 @@
 			function getGeoCenter(object) {				
 				 var boundingbox = new THREE.Box3();
 				 boundingbox.setFromObject(object);
+				 console.log("bounding");
 				 console.log(boundingbox);
 				 return boundingbox.getCenter();
 			}
@@ -420,6 +401,7 @@
 			 function getCameraDistance(object) {
 				 var boundingbox = new THREE.Box3();
 				 boundingbox.setFromObject(object);
+				 console.log(boundingbox);
 				 sceneRadiusForCamera = Math.max(
 					 boundingbox.max.y - boundingbox.min.y,
 					 boundingbox.max.z - boundingbox.min.z,
