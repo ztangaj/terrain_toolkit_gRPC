@@ -78,6 +78,7 @@ inline unsigned Mesh::closest_vertices(SurfacePoint* p,
 	}
 	else if(p->type() == FACE)
 	{
+		
 		if(storage)
 		{
 			vertex_pointer* vp= p->base_element()->adjacent_vertices().begin();
@@ -435,7 +436,7 @@ inline bool Mesh::verify()		//verifies connectivity of the mesh and prints some 
 	for(unsigned i=0; i<m_vertices.size(); ++i)
 	{
 		Vertex& v = m_vertices[i];
-		minx = std::min(minx, v.x());
+		minx = std::min(minx, v.x());		
 		maxx = std::max(maxx, v.x());
 		miny = std::min(miny, v.y());
 		maxy = std::max(maxy, v.y());

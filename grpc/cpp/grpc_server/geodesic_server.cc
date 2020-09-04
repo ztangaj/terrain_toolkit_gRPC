@@ -19,6 +19,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <regex>
 
 #include <grpcpp/grpcpp.h>
 #include "geodesic.grpc.pb.h"
@@ -33,16 +34,13 @@
 
 #include "distance.h"
 #include "geodesic_algorithm_subdivision.h"
+#include "critical.h"
 
+using namespace geodesic_gRPC;
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-using geodesic_gRPC::HelloRequest;
-using geodesic_gRPC::HelloReply;
-using geodesic_gRPC::FindPathByVertexCordRequest;
-using geodesic_gRPC::Path;
-using geodesic_gRPC::Geodesic;
 
 geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* mesh){
   std::string delimiter = ",";
@@ -70,6 +68,21 @@ geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* 
 
 // Logic and data behind the server's behavior.
 class GeodesicServiceImpl final : public Geodesic::Service {
+
+  public:
+    GeodesicServiceImpl(){
+      //TODO dynamic load model path
+      bool success = geodesic::read_mesh_from_file("/etc/terrain_toolkit/models/off/small_terrain.off", points,faces);
+      if(!success)
+      {
+        // TODO::handle error
+      }
+      mesh.initialize_mesh_data(points, faces);
+    };
+
+    ~GeodesicServiceImpl(){};
+    geodesic::Mesh mesh;
+
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
     std::string prefix("Hello ");
@@ -78,41 +91,83 @@ class GeodesicServiceImpl final : public Geodesic::Service {
   }
   Status FindPathByVertexCord(ServerContext* context, const FindPathByVertexCordRequest* request,
                        Path* reply) override {
-    bool success = geodesic::read_mesh_from_file("small_terrain.off",points,faces);
-
-    if(!success)
-    {
-      reply->set_message("something is wrong with the input file");
-      return Status::CANCELLED;
-    }
-
-    mesh.initialize_mesh_data(points, faces);		//create internal mesh data structure including edges
-
-    geodesic::GeodesicAlgorithmExact algorithm(&mesh);	//create exact algorithm for the mesh
-
-    // std::cout << request->algo_type() << std::endl;
-    // std::cout << request->v1() << std::endl;
-    // std::cout << request->v2() << std::endl;
+    geodesic::GeodesicAlgorithmExact algorithm(&mesh);
     geodesic::SurfacePoint source = findVertexByCordStr(request->v1(), &mesh);
     geodesic::SurfacePoint destination = findVertexByCordStr(request->v2(), &mesh);
-
-    // geodesic::SurfacePoint source(&mesh.vertices()[5]);
-    // geodesic::SurfacePoint destination(&mesh.vertices()[500]);
 
     std::vector<geodesic::SurfacePoint> path;
     algorithm.geodesic(source, destination, path);
 
     for(unsigned i = 0; i<path.size(); ++i)
     {
-        geodesic::SurfacePoint& s = path[i];
-        
-        std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
+        geodesic::SurfacePoint& s = path[i];        
+        // std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
         reply->add_path(s.x());
         reply->add_path(s.y());
         reply->add_path(s.z());
     }
     reply->set_message("success");
     return Status::OK;
+  }
+
+  Status GetTerrainInfo(ServerContext* context, const HelloRequest* request,
+                       TerrainInfo* reply) override 
+  {
+    std::string json = "";
+    json += "{";
+    json += "\"vertices\": " + std::to_string(mesh.vertices().size()) + ",";
+    json += "\"edges\": " + std::to_string(mesh.edges().size())+ ",";
+    json += "\"faces\": " + std::to_string(mesh.faces().size())+ ",";
+
+    double minx = 1e100;
+    double maxx = -1e100;
+    double miny = 1e100;
+    double maxy = -1e100;
+    double minz = 1e100;
+    double maxz = -1e100;
+    for(unsigned i=0; i<mesh.vertices().size(); ++i)
+    {
+      geodesic::Vertex& v = mesh.vertices()[i];
+      minx = std::min(minx, v.x());		
+      maxx = std::max(maxx, v.x());
+      miny = std::min(miny, v.y());
+      maxy = std::max(maxy, v.y());
+      minz = std::min(minz, v.z());
+      maxz = std::max(maxz, v.z());
+    }
+
+    json += "\"minx\": " + std::to_string(minx) + ",";
+    json += "\"miny\": " + std::to_string(miny) + ",";
+    json += "\"minz\": " + std::to_string(minz) + ",";
+    json += "\"maxx\": " + std::to_string(maxx) + ",";
+    json += "\"maxy\": " + std::to_string(maxy) + ",";
+    json += "\"maxz\": " + std::to_string(maxz);
+    json += "}";
+
+    std::cout << json << std::endl;
+    reply->set_info(json);
+    return Status::OK;
+  }
+
+  Status SimplifyTerrain(ServerContext* context, const SimplifyTerrainRequest* request,
+                       ModelPath* reply) override {
+    std::cout<<"Simplify terrain"<<std::endl;
+    geodesic::GeodesicAlgorithmExact algorithm(&mesh);
+    float beta = request->beta();
+    std::string old_model_path = request->old_model_path();
+    // A FUNCTION TO SIMPLIFY
+    bool graph_success = simplify::generate_graph(old_model_path, old_model_path+".graph");
+    if(graph_success){
+      std::string graph_path = old_model_path.append(".graph");
+      std::string off_path = std::regex_replace(graph_path, std::regex(".off.graph"), std::to_string(beta)) + ".off";
+      bool off_success = simplify::generateOff(graph_path, beta, off_path);
+      if(off_success){        
+        std::cout<<off_path<<std::endl;
+        reply->set_model_path(off_path);
+        return Status::OK;
+      }
+    }
+    return Status::CANCELLED;
   }
 };
 
@@ -137,6 +192,5 @@ void RunServer() {
 
 int main(int argc, char** argv) {
   RunServer();
-
   return 0;
 }

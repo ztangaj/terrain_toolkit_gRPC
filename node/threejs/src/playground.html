@@ -7,88 +7,22 @@
     </head>
     
     <body>
-
+    <input type="file" name="inputfile" id="inputfile"> 
     <script src="../build/three.js"></script>
     <script src="js/controls/OrbitControls.js"></script>
-    <script>
+    <script type="text/javascript">
 
-        var camera, scene, renderer, controls, mesh;
-        // basic setups
-        function init(){
-            container = document.createElement('div');
-            document.body.appendChild(container);
-
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
-            scene = new THREE.Scene();
-            
-            var ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
-            scene.add(ambientLight);
-
-            var pointLight = new THREE.PointLight(0xffffff, 0.8);
-            camera.add(pointLight);
-            scene.add(camera);
-
-            renderer = new THREE.WebGLRenderer();
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer.domElement);
-
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-            // geometry definition
-            var geometry = new THREE.BoxBufferGeometry(200,200,200);
-            var material = new THREE.MeshNormalMaterial();
-                        
-            mesh = new THREE.Mesh(geometry, material);
-            // move mesh not geometry
-            mesh.position.set(589440,5213430,1288);
-
-            scene.add(mesh);
-            console.log(scene);
-
-            // camera setting
-
-            camera.position.set(589440,5213430,1688);
-            // camera.position.set(0,0,100);
-            // camera.lookAt(589440,5213430,1288);
-            controls.target.set(589440,5213430,1288);
-
-            window.addEventListener( 'resize', onWindowResize, false );
-
-            // the right way to show a object at large cord
-            // 589230,5213145,1404
-            // var center = new THREE.Vector3(589230,5213145,1404);
-            // cube.position.set(center.x, center.y, center.z);
-            // camera.position.set(center.x, center.y, center.z + 700);
-            // controls.target.set(center.x, center.y, center.z);
-            // console.log(camera.position);
-            // console.log(cube.position);
-            // controls.target.set(center);
-
-        }
-       
-
-        // animate
-        function animate() {
-            requestAnimationFrame(animate);
-            mesh.rotation.x += 0.005;
-			mesh.rotation.y += 0.01;
-            controls.update();
-            render();
-        }
-
-        function render(){
-            renderer.render(scene, camera);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize( window.innerWidth, window.innerHeight );
-        }
-
-        init();
-        animate();
+        var text = ["hi"];
+        var input = document.getElementById('inputfile');
+        input.onchange = function(){         
+            var fr=new FileReader();         
+            fr.readAsText(this.files[0]); 
+            fr.onload=function(){
+                text.push(fr.result.split(/\r\n|\n/)[0]);
+                console.log(text);
+            };
+        };
+        
     </script>
     </body>
 </html>

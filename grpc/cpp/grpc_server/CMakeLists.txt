@@ -96,16 +96,55 @@ add_custom_command(
         "${hw_proto}"
       DEPENDS "${hw_proto}")
 
-# Include generated *.pb.h files
-include_directories("${CMAKE_CURRENT_BINARY_DIR}" "../geodesic")
+# CGAL and its components
+find_package( CGAL QUIET COMPONENTS  )
+
+if ( NOT CGAL_FOUND )
+
+  message(STATUS "This project requires the CGAL library, and will not be compiled.")
+  return()  
+
+endif()
+
+# include helper file
+include( ${CGAL_USE_FILE} )
+
+# Boost and its components
+find_package( Boost REQUIRED )
+find_package(Boost REQUIRED COMPONENTS system program_options)
+
+if ( NOT Boost_FOUND )
+
+  message(STATUS "This project requires the Boost library, and will not be compiled.")
+
+  return()  
+
+endif()
 
 # Targets greeter_[async_](client|server)
-foreach(_target
-  geodesic_client geodesic_server)
-  add_executable(${_target} "${_target}.cc"
+#foreach(_target
+#  geodesic_client geodesic_server)
+#  add_executable(${_target} "${_target}.cc "
+#    ${hw_proto_srcs}
+#    ${hw_grpc_srcs})
+#  target_link_libraries(${_target}
+#    ${_GRPC_GRPCPP_UNSECURE}
+#    ${_PROTOBUF_LIBPROTOBUF})
+#endforeach()
+
+# Include generated *.pb.h files
+set(GEODESIC_DIR "../geodesic")
+set(SIMPLIFY_DIR "../code_simplification_manu")
+
+include_directories("${CMAKE_CURRENT_BINARY_DIR}" "${GEODESIC_DIR}" "${SIMPLIFY_DIR}")
+
+# link simplify files
+
+add_executable(geodesic_server geodesic_server.cc
+    "${SIMPLIFY_DIR}/critical.h"
     ${hw_proto_srcs}
     ${hw_grpc_srcs})
-  target_link_libraries(${_target}
+  target_link_libraries(geodesic_server
     ${_GRPC_GRPCPP_UNSECURE}
-    ${_PROTOBUF_LIBPROTOBUF})
-endforeach()
+    ${_PROTOBUF_LIBPROTOBUF}
+    Boost::system Boost::program_options)
