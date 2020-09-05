@@ -73,6 +73,16 @@
         controls = new THREE.OrbitControls( camera, renderer.domElement );    
     }
 
+    function cleanup(){        
+        vertices = [];
+        objects = [];
+        group = new THREE.Group();
+        scene.traverse( function ( child ) {
+            if(child.type=="Group") {
+                scene.remove(child);
+            };
+        });
+    }
     /*  parser rules
         1. if see #, skip to next line
         2. first line, OFF
@@ -83,15 +93,10 @@
         we only consider case dim==3
         we assume no more comment after the num info line
     */
-    function cleanup(){        
-        vertices = [];
-        objects = [];
-        group = new THREE.Group();
-        scene.traverse( function ( child ) {
-            if(child.type=="Group") {
-                scene.remove(child);
-            };
-        });
+    function loadOffModel(file){
+        var fr=new FileReader();
+        fr.readAsText(this.files[0]);
+        const allLines =  fr.result.split(/\r\n|\n/);
     }
 
     init();
@@ -205,33 +210,6 @@
             animate();  
         }
     };
-
-    function doDispose(obj)
-    {
-        if (obj !== null)
-        {
-            for (var i = 0; i < obj.children.length; i++)
-            {
-                doDispose(obj.children[i]);
-            }
-            if (obj.geometry)
-            {
-                obj.geometry.dispose();
-                obj.geometry = undefined;
-            }
-            if (obj.material)
-            {
-                if (obj.material.map)
-                {
-                    obj.material.map.dispose();
-                    obj.material.map = undefined;
-                }
-                obj.material.dispose();
-                obj.material = undefined;
-            }
-        }
-        obj = undefined;
-    }
 
     function animate() {
         requestAnimationFrame( animate );
