@@ -191,6 +191,18 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     }
     return Status::CANCELLED;
   }
+
+  Status UploadModelContent(ServerContext* context, const ModelContent* request,
+                       ModelPath* reply) override {    
+    std::cout<<"upload content"<<std::endl;
+    std::ofstream outfile;
+    // TODO: assume upload off file only, later need to do format conversion from obj to off, etc
+    outfile.open(src_dir+"models/off/upload.off");
+    outfile << request->content();
+    outfile.close();
+    reply->set_model_path("models/off/upload.off");
+    return Status::OK;
+  }
 };
 
 void RunServer() {

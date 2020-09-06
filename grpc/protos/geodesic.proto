@@ -14,6 +14,9 @@ service Geodesic {
   rpc SimplifyTerrain(SimplifyTerrainRequest) returns(ModelPath){}
   // load the mesh in c++ for terrain info and shortest path computation
   rpc LoadModel(ModelPath) returns(TerrainInfo){}
+  // get the content, save it to a file and return the path, since browser cannot do so due to security reason
+  // TODO: implement a stream rpc, this function can only deal with small file
+  rpc UploadModelContent(ModelContent) returns(ModelPath){}
 }
 
 // Dummy request
@@ -50,4 +53,8 @@ message TerrainInfo{
 
 message ModelPath {
   string model_path = 1;
+}
+
+message ModelContent {
+  string content = 1;
 }

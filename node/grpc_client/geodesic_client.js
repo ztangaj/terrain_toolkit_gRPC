@@ -49,12 +49,12 @@ function getPath(query, successCallback, errorCallback) {
 // }
 
 function loadModel(query, successCallback, errorCallback){
-    var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
-    client.LoadModel(query, function(err, response){
-      successCallback(response.info);
-      errorCallback(err);
-    });
-  }
+  var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
+  client.LoadModel(query, function(err, response){
+    successCallback(response.info);
+    errorCallback(err);
+  });
+}
 
 function simplifyTerrain(query, successCallback, errorCallback){
   var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
@@ -64,6 +64,13 @@ function simplifyTerrain(query, successCallback, errorCallback){
   });
 }
 
+function uploadModelContent(query, successCallback, errorCallback){
+  var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
+  client.UploadModelContent(query, function(err, response){
+    successCallback(response.model_path);
+    errorCallback(err);
+  });
+}
 
 // wraps the above function call into a Promise
 // and handles the callbacks with resolve and reject
@@ -92,19 +99,30 @@ function getPathAsync(query) {
 // }
 
 function loadModelAsync(query){
-    return new Promise((resolve, reject) => {
-      loadModel(query,(successResponse) => {
-            resolve(successResponse);
-        }, (errorResponse) => {
-            console.log(errorResponse);
-            reject(errorResponse)
-        });
-    });
-  }
+  return new Promise((resolve, reject) => {
+    loadModel(query,(successResponse) => {
+          resolve(successResponse);
+      }, (errorResponse) => {
+          console.log(errorResponse);
+          reject(errorResponse)
+      });
+  });
+}
 
 function simplifyTerrainAsync(query){
   return new Promise((resolve, reject) => {
     simplifyTerrain(query,(successResponse) => {
+          resolve(successResponse);
+      }, (errorResponse) => {
+          console.log(errorResponse);
+          reject(errorResponse)
+      });
+  });
+}
+
+function uploadModelContentAsync(query){
+  return new Promise((resolve, reject) => {
+    uploadModelContent(query,(successResponse) => {
           resolve(successResponse);
       }, (errorResponse) => {
           console.log(errorResponse);
@@ -138,6 +156,15 @@ app.post('/load-model', function(request, response) {
   loadModelAsync(request.body).then((result)=>{
     console.log(result);
     response.json({info: result.toString()});
+    response.status(200).end();
+  })
+})
+
+app.post('/upload-model-content', function(request, response) {
+  console.log("post request for upload model received");
+  uploadModelContentAsync(request.body).then((result)=>{
+    console.log(result);
+    response.json({model_path: result.toString()});
     response.status(200).end();
   })
 })

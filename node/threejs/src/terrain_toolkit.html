@@ -140,6 +140,7 @@
 				findPath: function(){
 					findPath(selectedPoints[0], selectedPoints[1])
 				},
+				distance: 0.0,
 				beta: 1,
 				simplify: function(){
 					simplifyTerrain(MODEL_PATH);
@@ -196,10 +197,11 @@
 				}
 			}
 
-			function cleanup(){        
+			function cleanup(){     
 				console.log(scene);
 				vertices = [];
 				faces = [];
+				selectedPoints = [];
 				group = new THREE.Group();
 				to_remove = [];
 				for(var i =0; i<scene.children.length;i++){
@@ -240,7 +242,7 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				console.log(scene);
-				loadModel("models/off/small_terrain.off");		
+				// loadModel("models/off/small_terrain.off");		
 			}						
 
 			function generateMaterial(min_z, max_z) {								
@@ -383,6 +385,20 @@
 					console.log(error);
 				});
 			}
+
+			function uploadModelContent(content) {
+				axios.post('http://localhost:8080/upload-model-content', {
+					content: content
+				})
+				.then(function (response) {
+					MODEL_PATH = response.data.model_path;
+					loadModel(MODEL_PATH);
+				})
+				.catch(function (error) {
+					console.log(error);
+				});
+			}
+			
 			//deprecated, get the info when loading model in c++
 			// function getTerrainInfo(panel_options){
 			// 	axios.get('http://localhost:8080/get-terrain-info', {})
@@ -410,7 +426,12 @@
 				});
 
 				var line = new THREE.Line(geometry, material);
+				line.computeLineDistances();
+				var distances = line.geometry.attributes.lineDistance.array;
+				panel_options.distance = distances[distances.length-1].toFixed(5);
+				console.log( distances[distances.length-1]);
 				scene.add(line);
+				refreshControlPanel(panel_options);
 			}
  
 			function getCameraDistance(object) {
@@ -460,6 +481,7 @@
 				if(selectedPoints[0]&&selectedPoints[1]){
 					points.add(options, 'findPath').name('Find shortest path');
 				}
+				points.add(options, 'distance').name("Distance");
 				points.open();
 
 				var simplify = controlPanel.addFolder('Terrain Simplification');
@@ -491,14 +513,15 @@
 				var fr=new FileReader();
 				fr.readAsText(this.files[0]);
 				fr.onload = function(){
-					// serverLoadModel()
-					model = loadOffModel(fr.result);
-					meterial = generateMaterial(model.z.min, model.z.max);
-					cleanup();
-					visualizeModel(camera, controls, scene, model, meterial);
-					showVertices(model);
-					animate(); 
+					// // serverLoadModel()
+					// model = loadOffModel(fr.result);
+					// meterial = generateMaterial(model.z.min, model.z.max);
+					// cleanup();
+					// visualizeModel(camera, controls, scene, model, meterial);
+					// showVertices(model);
+					// animate(); 
 					// getTerrainInfo(panel_options);
+					uploadModelContent(fr.result);
 				};
 			};
 
