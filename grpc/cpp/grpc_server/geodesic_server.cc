@@ -42,6 +42,9 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+//TODO: only valid for wsl environment, make it to be read from config file
+std::string src_dir = "/mnt/c/Users/huaxuan/source/repos/terrain_web/node/threejs/src/";
+
 geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* mesh){
   std::string delimiter = ",";
   size_t pos = 0;
@@ -66,22 +69,68 @@ geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* 
   return result;
 }
 
+std::string generateTerrainInfoJSON(geodesic::Mesh mesh){
+  std::string json = "";
+  json += "{";
+  json += "\"vertices\": " + std::to_string(mesh.vertices().size()) + ",";
+  json += "\"edges\": " + std::to_string(mesh.edges().size())+ ",";
+  json += "\"faces\": " + std::to_string(mesh.faces().size())+ ",";
+
+  double minx = 1e100;
+  double maxx = -1e100;
+  double miny = 1e100;
+  double maxy = -1e100;
+  double minz = 1e100;
+  double maxz = -1e100;
+  for(unsigned i=0; i<mesh.vertices().size(); ++i)
+  {
+    geodesic::Vertex& v = mesh.vertices()[i];
+    minx = std::min(minx, v.x());		
+    maxx = std::max(maxx, v.x());
+    miny = std::min(miny, v.y());
+    maxy = std::max(maxy, v.y());
+    minz = std::min(minz, v.z());
+    maxz = std::max(maxz, v.z());
+  }
+
+  json += "\"minx\": " + std::to_string(minx) + ",";
+  json += "\"miny\": " + std::to_string(miny) + ",";
+  json += "\"minz\": " + std::to_string(minz) + ",";
+  json += "\"maxx\": " + std::to_string(maxx) + ",";
+  json += "\"maxy\": " + std::to_string(maxy) + ",";
+  json += "\"maxz\": " + std::to_string(maxz);
+  json += "}";
+  
+  return json;
+}
+
 // Logic and data behind the server's behavior.
 class GeodesicServiceImpl final : public Geodesic::Service {
 
   public:
+    geodesic::Mesh mesh;
+    
     GeodesicServiceImpl(){
-      //TODO dynamic load model path
-      bool success = geodesic::read_mesh_from_file("/etc/terrain_toolkit/models/off/small_terrain.off", points,faces);
-      if(!success)
-      {
-        // TODO::handle error
-      }
-      mesh.initialize_mesh_data(points, faces);
+      // Init();   
     };
 
     ~GeodesicServiceImpl(){};
-    geodesic::Mesh mesh;
+
+    bool LoadModelByPath(std::string path){
+      //TODO dynamic load model path
+      // std::vector<double> points;	
+      // std::vector<unsigned> faces;
+      char* path_c = strcpy(new char[path.length() + 1], path.c_str());
+      bool success = geodesic::read_mesh_from_file(path_c, points,faces);
+      if(!success)
+      {
+        // TODO::handle error
+        std::cout<<"Load model failed!"<<std::endl;
+        return false;
+      }
+      mesh.initialize_mesh_data(points, faces);
+      return true;
+    }
 
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
@@ -110,43 +159,16 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     return Status::OK;
   }
 
-  Status GetTerrainInfo(ServerContext* context, const HelloRequest* request,
+  Status LoadModel(ServerContext* context, const ModelPath* request,
                        TerrainInfo* reply) override 
   {
-    std::string json = "";
-    json += "{";
-    json += "\"vertices\": " + std::to_string(mesh.vertices().size()) + ",";
-    json += "\"edges\": " + std::to_string(mesh.edges().size())+ ",";
-    json += "\"faces\": " + std::to_string(mesh.faces().size())+ ",";
-
-    double minx = 1e100;
-    double maxx = -1e100;
-    double miny = 1e100;
-    double maxy = -1e100;
-    double minz = 1e100;
-    double maxz = -1e100;
-    for(unsigned i=0; i<mesh.vertices().size(); ++i)
-    {
-      geodesic::Vertex& v = mesh.vertices()[i];
-      minx = std::min(minx, v.x());		
-      maxx = std::max(maxx, v.x());
-      miny = std::min(miny, v.y());
-      maxy = std::max(maxy, v.y());
-      minz = std::min(minz, v.z());
-      maxz = std::max(maxz, v.z());
+    if(LoadModelByPath(src_dir + request->model_path())){
+      std::string json = generateTerrainInfoJSON(mesh);
+      std::cout << json << std::endl;
+      reply->set_info(json);
+      return Status::OK;
     }
-
-    json += "\"minx\": " + std::to_string(minx) + ",";
-    json += "\"miny\": " + std::to_string(miny) + ",";
-    json += "\"minz\": " + std::to_string(minz) + ",";
-    json += "\"maxx\": " + std::to_string(maxx) + ",";
-    json += "\"maxy\": " + std::to_string(maxy) + ",";
-    json += "\"maxz\": " + std::to_string(maxz);
-    json += "}";
-
-    std::cout << json << std::endl;
-    reply->set_info(json);
-    return Status::OK;
+    return Status::CANCELLED;
   }
 
   Status SimplifyTerrain(ServerContext* context, const SimplifyTerrainRequest* request,
@@ -154,7 +176,7 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     std::cout<<"Simplify terrain"<<std::endl;
     geodesic::GeodesicAlgorithmExact algorithm(&mesh);
     float beta = request->beta();
-    std::string old_model_path = request->old_model_path();
+    std::string old_model_path = src_dir + request->old_model_path();
     // A FUNCTION TO SIMPLIFY
     bool graph_success = simplify::generate_graph(old_model_path, old_model_path+".graph");
     if(graph_success){
@@ -163,7 +185,7 @@ class GeodesicServiceImpl final : public Geodesic::Service {
       bool off_success = simplify::generateOff(graph_path, beta, off_path);
       if(off_success){        
         std::cout<<off_path<<std::endl;
-        reply->set_model_path(off_path);
+        reply->set_model_path(std::regex_replace(off_path, std::regex(src_dir), std::string("")));
         return Status::OK;
       }
     }

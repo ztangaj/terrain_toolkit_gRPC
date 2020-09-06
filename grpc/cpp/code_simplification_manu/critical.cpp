@@ -17,7 +17,7 @@
 #define _SCL_SECURE_NO_WARNINGS
 #endif
 
-#include "critical2.h"
+#include "critical.h"
 using namespace simplify;
 /*----------------------------------------------------------------------
  Main Function

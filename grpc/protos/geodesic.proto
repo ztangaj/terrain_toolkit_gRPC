@@ -4,22 +4,24 @@ package geodesic_gRPC;
 
 // The greeting service definition.
 service Geodesic {
-  // Sends a greeting
+  // Sends a greeting, dummy
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   // request shortest path using vertex id
   rpc FindPathByVertexCord(FindPathByVertexCordRequest) returns (Path) {}
-
-  rpc GetTerrainInfo(HelloRequest) returns(TerrainInfo) {}
-
+  // terrain information in json format
+  // rpc GetTerrainInfo(HelloRequest) returns(TerrainInfo) {}
+  // produce a .graph file and .off file of the simplified terrain based on beta param
   rpc SimplifyTerrain(SimplifyTerrainRequest) returns(ModelPath){}
+  // load the mesh in c++ for terrain info and shortest path computation
+  rpc LoadModel(ModelPath) returns(TerrainInfo){}
 }
 
-// The request message containing the user's name.
+// Dummy request
 message HelloRequest {
   string name = 1;
 }
 
-// The response message containing the greetings
+// Dummy reply with only a message
 message HelloReply {
   string message = 1;
 }
@@ -48,5 +50,4 @@ message TerrainInfo{
 
 message ModelPath {
   string model_path = 1;
-  
 }

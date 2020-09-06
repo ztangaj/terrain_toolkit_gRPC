@@ -46,6 +46,7 @@
 		<script src="js/controls/OrbitControls.js"></script>
 		<script src="js/dat.gui.js"></script>
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="offLoader.js"></script>
 		
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vUv;				
@@ -95,7 +96,8 @@
 			}
 
 			// https://3d-convert.com/en/convert/off-to-obj.html
-			var MODEL_PATH = "/etc/terrain_toolkit/models/obj/small_terrain.off";
+			// var MODEL_PATH = "/etc/terrain_toolkit/models/obj/small_terrain.off";
+			var MODEL_PATH = "models/off/small_terrain.off";
 
 			var container;		
 
@@ -109,6 +111,8 @@
 			var controls;		
 
 			var vertices;	
+
+			var model;
 
 			var selectedPoints = [];
 
@@ -130,25 +134,85 @@
 			} );
 
 			var panel_options = {
-				basicInfo: "empty",
-				pointA: selectedPoints[0] ? vec3ToString(selectedPoints[0]) : "empty",
-				pointB: selectedPoints[1] ? vec3ToString(selectedPoints[1]) : "empty",
-				camera: {
-					speed: 0.0001
-				},
+				basicInfo: null,
+				pointA: "empty",
+				pointB: "empty",
 				findPath: function(){
 					findPath(selectedPoints[0], selectedPoints[1])
 				},
 				beta: 1,
 				simplify: function(){
-					simplifyTerrain(beta, MODEL_PATH);
-				},			
+					simplifyTerrain(MODEL_PATH);
+				},		
+				reset: function(){
+					cleanup();
+				}	
 			};
 
-			init();			
-			animate();	
-			refreshControlPanel(panel_options);
+			function loadModel(path){
+				fetch(path)
+				.then(response => response.text())
+				.then((data) => {
+					serverLoadModel(path);
+					model = loadOffModel(data);
+					console.log(model);
+					meterial = generateMaterial(model.z.min, model.z.max);
+					cleanup();
+					visualizeModel(camera, controls, scene, model, meterial);
+					showVertices(model);
+					animate(); 
+					// getTerrainInfo(panel_options);				
+  				})
+			}
 
+			function showVertices(model) {
+				if(highlightVertex){				
+					vertices = model.v;
+					var vertices_raw = new Float32Array(3*vertices.length);
+					for(var i=0; i<vertices.length;i++){
+						vertices_raw[3*i] = vertices[i].x;
+						vertices_raw[3*i+1] = vertices[i].y;
+						vertices_raw[3*i+2] = vertices[i].z;
+					}
+					console.log(vertices_raw);
+					var colors = new Float32Array( vertices_raw.length );
+					var sizes = new Float32Array( vertices_raw.length );
+
+					var color = new THREE.Color();
+					for ( var i = 0, l = vertices_raw.length / 3; i < l; i ++ ) {
+						color = new THREE.Color("rgb(255,0,0)");
+						color.toArray( colors, i * 3 );
+						sizes[ i ] = PARTICLE_SIZE;
+					}
+					var geometry = new THREE.BufferGeometry();
+					geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices_raw, 3 ) );
+					geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+					geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+
+					// deprecated, don't use sprit for vertex now
+					particles = new THREE.Points( geometry, pointMaterial );
+					particles.name = "points";
+					scene.add( particles );
+				}
+			}
+
+			function cleanup(){        
+				console.log(scene);
+				vertices = [];
+				faces = [];
+				group = new THREE.Group();
+				to_remove = [];
+				for(var i =0; i<scene.children.length;i++){
+					var child = scene.children[i];
+					if(child.type!="AmbientLight" || child.type!="PerspectiveCamera") {
+						to_remove.push(child);
+					};
+				}
+				to_remove.forEach(child => {
+					scene.remove(child);
+				});
+			}			
+				
 			function init() {	
 				var center;
 				var distance;
@@ -161,46 +225,6 @@
 				var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
 				camera.add( pointLight );
 				scene.add( camera );
-				// load model manager
-				var manager = new THREE.LoadingManager();
-				manager.onProgress = function ( item, loaded, total ) {
-					console.log( item, loaded, total );
-				};
-				// after load model, we have vertices, can render the points
-				manager.onLoad = function () {
-					if(highlightVertex){				
-						console.log(vertices);
-						var colors = new Float32Array( vertices.length );
-						var sizes = new Float32Array( vertices.length );
-
-						var color = new THREE.Color();
-						for ( var i = 0, l = vertices.length / 3; i < l; i ++ ) {
-							// color.setHSL( 0.01 + 0.1 * ( i / l ), 1.0, 0.5 );
-							color = new THREE.Color("rgb(255,0,0)");
-							color.toArray( colors, i * 3 );
-							sizes[ i ] = PARTICLE_SIZE;
-						}
-						var geometry = new THREE.BufferGeometry();
-						geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-						geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
-						geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
-
-						// deprecated, don't use sprit for vertex now
-						particles = new THREE.Points( geometry, pointMaterial );
-						particles.name = "points";
-						scene.add( particles );
-						refreshControlPanel(panel_options);
-					}
-				};
-				
-				function onProgress( xhr ) {
-					if ( xhr.lengthComputable ) {
-						var percentComplete = xhr.loaded / xhr.total * 100;
-						console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
-					}
-				}
-
-				function onError() {}				
 
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -208,31 +232,6 @@
 				container.appendChild( renderer.domElement );
 				
 				controls = new THREE.OrbitControls( camera, renderer.domElement );																			
-
-				var loader = new THREE.OBJLoader( manager );					
-
-				loader.load( MODEL_PATH, function( object ) {	
-					object.traverse( function ( child ) {
-						if(child.isMesh) {
-							console.log(child.geometry.faces);
-							child.material = generateMaterial(object);							
-							vertices = child.geometry.attributes.position.array;
-							console.log(vertices);
-						};
-					} );
-					object.name = "test";
-					scene.add(object);									
-
-					center = getGeoCenter(object);
-					distance = getCameraDistance(object);
-
-					camera.position.set( center.x , center.y, center.z + distance);	
-					controls.target.set(center.x, center.y, center.z );
-					controls.update();						
-				}
-				, onProgress, onError );				
-
-				// 
 				raycaster = new THREE.Raycaster();
 				mouse = new THREE.Vector2();
 
@@ -241,18 +240,11 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				console.log(scene);
-				getTerrainInfo(panel_options);
-				
+				loadModel("models/off/small_terrain.off");		
 			}						
 
-			function generateMaterial(object) {				
-				var boundingbox = new THREE.Box3();
-				boundingbox.setFromObject(object);
-				var max_z = boundingbox.max.z;
-				var min_z = boundingbox.min.z;
+			function generateMaterial(min_z, max_z) {								
 				var fragment_shader = document.getElementById('fragmentShader').textContent;
-				console.log("shader");
-				console.log(fragment_shader);
 				var new_shader = fragment_shader.replace("MAX_Z", max_z.toFixed(1));
 				new_shader = new_shader.replace("MIN_Z", min_z.toFixed(1));
 				var newMaterial = new THREE.ShaderMaterial({				
@@ -322,12 +314,12 @@
 						}						
 					}			
 					else{
-						console.log("Only allow select 2 at a time!");
+						alert("You have selected 2 points");
 					}	
 					// if new point but selected is already 2, do nothing, user need to deselect previous points, maybe a bad design
-
-					//debug
-					console.log(selectedPoints);
+					// console.log(selectedPoints);
+					panel_options.pointA = selectedPoints[0] ? vec3ToString(selectedPoints[0]) : "empty";
+					panel_options.pointB = selectedPoints[1] ? vec3ToString(selectedPoints[1]) : "empty";
 					refreshControlPanel(panel_options);
 				}
 			}
@@ -361,35 +353,48 @@
 				}
 			}
 
-			function simplifyTerrain(beta, model_path){
-				console.log(beta);
+			function simplifyTerrain(model_path){
 				axios.post('http://localhost:8080/simplify-terrain', {
-					beta: beta,
+					beta: panel_options.beta,
 					old_model_path: model_path
 				})
 				.then(function(response){
-					console.log(response)
+					panel_options.pointA = response.model_path;
+					console.log(response);
+					loadModel(response.data.model_path);
+					// alert(response);
 					// reload model based on returned new model path
 				})
 				.catch(function (error) {
-						console.log(error);
+					console.log(error);
 				});
 			}
 
-			function getTerrainInfo(panel_options){
-				console.log(panel_options);
-				axios.get('http://localhost:8080/get-terrain-info', {})
-				.then(function (response) {
+			function serverLoadModel(model_path){
+				axios.post('http://localhost:8080/load-model', {
+					model_path: model_path
+				})
+				.then(function(response){
 					var info = JSON. parse(response.data.info);
 					panel_options.basicInfo = info;
-					console.log("get terrain info")
-					console.log(panel_options);
 					refreshControlPanel(panel_options);
 				})
 				.catch(function (error) {
 					console.log(error);
 				});
 			}
+			//deprecated, get the info when loading model in c++
+			// function getTerrainInfo(panel_options){
+			// 	axios.get('http://localhost:8080/get-terrain-info', {})
+			// 	.then(function (response) {
+			// 		var info = JSON. parse(response.data.info);
+			// 		panel_options.basicInfo = info;
+			// 		refreshControlPanel(panel_options);
+			// 	})
+			// 	.catch(function (error) {
+			// 		console.log(error);
+			// 	});
+			// }
 
 			function drawPath(pathStr){
 				var cords = pathStr.split(",");	
@@ -407,15 +412,8 @@
 				var line = new THREE.Line(geometry, material);
 				scene.add(line);
 			}
-
-			// TODO: We compute the bounding box repeatedly, use a var to store it
-			function getGeoCenter(object) {				
-				 var boundingbox = new THREE.Box3();
-				 boundingbox.setFromObject(object);
-				 return boundingbox.getCenter();
-			}
  
-			 function getCameraDistance(object) {
+			function getCameraDistance(object) {
 				 var boundingbox = new THREE.Box3();
 				 boundingbox.setFromObject(object);
 				 sceneRadiusForCamera = Math.max(
@@ -465,40 +463,15 @@
 				points.open();
 
 				var simplify = controlPanel.addFolder('Terrain Simplification');
-				simplify.add(options, 'beta', 1, 2).name('Error parameter').listen()
+				var beta_slidebar = simplify.add(options, 'beta', 1, 10).name('Error parameter').listen();
+				beta_slidebar.onChange(function(value){
+					panel_options.beta = value;
+				})				
 				simplify.add(options, 'simplify').name('Simplify terrain');
+				simplify.open();
 
-				// gui.add(options, 'reset');
-			}
-			
-
-			// TODO: 1. change input, maybe not a file
-			document.getElementById('inputfile') .addEventListener('change', function() {
-				var fr=new FileReader();         
-				fr.readAsText(this.files[0]); 
-				fr.onload=function(){ 					
-					var path = [];
-					const allLines =  fr.result.split(/\r\n|\n/);
-					// Reading line by line
-					for(var i=0; i<allLines.length; i++){
-						var line = allLines[i];
-						var cord = line.split(" ");
-						x = parseInt(cord[0], 10);
-						y = parseInt(cord[1], 10);
-						z = parseInt(cord[2], 10);
-						var v = new THREE.Vector3(x,y,z);
-						path.push(v);
-					}
-					var geometry = new THREE.BufferGeometry().setFromPoints(path);
-					var material = new THREE.LineBasicMaterial({
-						color: 0xff0000,
-						linewidth: 3,
-					});
-
-					var line = new THREE.Line(geometry, material);
-					scene.add(line);
-				}
-			});
+				controlPanel.add(options, 'reset');
+			}			
 
 			function animate() {
 
@@ -511,7 +484,27 @@
 			function render() {						
 				renderer.render( scene, camera );
 			}
+			
+			var inputfile = document.getElementById('inputfile');
+			inputfile.onchange = function() {
+				console.log("file selected");
+				var fr=new FileReader();
+				fr.readAsText(this.files[0]);
+				fr.onload = function(){
+					// serverLoadModel()
+					model = loadOffModel(fr.result);
+					meterial = generateMaterial(model.z.min, model.z.max);
+					cleanup();
+					visualizeModel(camera, controls, scene, model, meterial);
+					showVertices(model);
+					animate(); 
+					// getTerrainInfo(panel_options);
+				};
+			};
 
+			init();			
+			animate();	
+			// refreshControlPanel(panel_options);
 		</script>
 
 	</body>

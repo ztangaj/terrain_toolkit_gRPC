@@ -1750,8 +1750,12 @@ bool generate_graph(std::string in_path, std::string out_path){
   }
 }
 
-bool generateOff(std::string graph_path, float beta, std::string off_path)
+bool generateOff(std::string graph_path, float beta_in, std::string off_path)
 {
+  // init global var
+  beta = beta_in;
+  REMOVED_VERTICES = 0;
+  
   std::ifstream is(graph_path);                                                          /* Read in the graph from file */
   char x;
   if(!(is >> x))
@@ -1779,10 +1783,6 @@ bool generateOff(std::string graph_path, float beta, std::string off_path)
       id[*vi] = vnum++;
   mygraph_t g_orig = g;                                                                   /* Keep a copy of the original graph */
 
-#if DEBUG_FLAG && DEBUG_MORE
-  D_("---- ORIGINAL GRAPH -----");
-  dump_graph( g_orig, id, weightmap);
-#endif
   print_hull(P, ch2d(P, read_points( vertex_props )));
 
   int K = hull_vertices.size();
@@ -1832,30 +1832,12 @@ bool generateOff(std::string graph_path, float beta, std::string off_path)
     } /* End of while X != b */
   } /* End of k convex hull edges */
 
-  #if DEBUG_FLAG && DEBUG_MORE
-  DM_(" ---------------- BOUNDARY VERTICES ----------------");
-  for(const auto& i : boundary_points_map){
-      DM_( i.first ) << " ";
-      DM_("\n");
-  DM_(" ---------------- BOUNDARY VERTICES [DONE] ---------");
-  }
-  #endif
-
   INIT_TIMER
 
   START_TIMER
   D_( "Removing Vertices ... " );
   remove_vertices( g, g_orig, id, weightmap );                                            /* Remove vertices */
   STOP_TIMER("Simplification: Vertex Removal Done!")
-
-  #if DEBUG_FLAG && DEBUG_MORE
-    dump_graph( g, id, weightmap);
-    dump_graph_visual( "all_graph_now", g, id );
-    dump_graph( g_orig, id, weightmap);
-    dumpL(L);
-    dumpHST(HST);
-    dumpREMOVED(REMOVED);
-  #endif
 
   graph_to_off(g, id, off_path);                                                              /* Get OFF from the graph */
 

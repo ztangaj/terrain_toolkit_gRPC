@@ -30,8 +30,8 @@ if ( NOT Boost_FOUND )
 
 endif()
 
-project(APP C CXX)
-add_executable(APP critical.cpp)
-target_link_libraries(APP Boost::system Boost::program_options)
+project(TEST C CXX)
+add_executable(TEST test.cpp)
+target_link_libraries(TEST Boost::system Boost::program_options)
 
 
