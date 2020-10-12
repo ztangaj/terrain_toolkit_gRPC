@@ -21,7 +21,11 @@
 #include <string>
 #include <regex>
 
-#include <grpcpp/grpcpp.h>
+#include <grpc/grpc.h>
+#include <grpcpp/server.h>
+#include <grpcpp/server_builder.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/security/server_credentials.h>
 #include "geodesic.grpc.pb.h"
 
 #include<sstream>
@@ -36,11 +40,15 @@
 #include "geodesic_algorithm_subdivision.h"
 #include "critical.h"
 
-using namespace geodesic_gRPC;
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
+using grpc::ServerReader;
+using grpc::ServerReaderWriter;
+using grpc::ServerWriter;
 using grpc::Status;
+
+using namespace geodesic_gRPC;
 
 //TODO: only valid for wsl environment, make it to be read from config file
 std::string src_dir = "/mnt/c/Users/huaxuan/source/repos/terrain_web/node/threejs/src/";
@@ -49,7 +57,7 @@ geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* 
   std::string delimiter = ",";
   size_t pos = 0;
   std::string token;
-  std::vector<_Float32> cords;
+  std::vector<double> cords;
   geodesic::SurfacePoint result;
 
   while ((pos = cordStr.find(delimiter)) != std::string::npos) {
@@ -120,6 +128,8 @@ class GeodesicServiceImpl final : public Geodesic::Service {
       //TODO dynamic load model path
       // std::vector<double> points;	
       // std::vector<unsigned> faces;
+      std::cout<<"Load model by path: " << path << std::endl;
+
       char* path_c = strcpy(new char[path.length() + 1], path.c_str());
       bool success = geodesic::read_mesh_from_file(path_c, points,faces);
       if(!success)
@@ -128,6 +138,7 @@ class GeodesicServiceImpl final : public Geodesic::Service {
         std::cout<<"Load model failed!"<<std::endl;
         return false;
       }
+      std::cout<<"Load model finished, init mesh"<<std::endl;
       mesh.initialize_mesh_data(points, faces);
       return true;
     }
@@ -140,6 +151,7 @@ class GeodesicServiceImpl final : public Geodesic::Service {
   }
   Status FindPathByVertexCord(ServerContext* context, const FindPathByVertexCordRequest* request,
                        Path* reply) override {
+    std::cout<<"Find Path"<<std::endl;
     geodesic::GeodesicAlgorithmExact algorithm(&mesh);
     geodesic::SurfacePoint source = findVertexByCordStr(request->v1(), &mesh);
     geodesic::SurfacePoint destination = findVertexByCordStr(request->v2(), &mesh);
@@ -162,21 +174,28 @@ class GeodesicServiceImpl final : public Geodesic::Service {
   Status LoadModel(ServerContext* context, const ModelPath* request,
                        TerrainInfo* reply) override 
   {
-    if(LoadModelByPath(src_dir + request->model_path())){
-      std::string json = generateTerrainInfoJSON(mesh);
-      std::cout << json << std::endl;
-      reply->set_info(json);
-      return Status::OK;
+    std::cout<<"Load Model"<<std::endl;
+    try{
+      if(LoadModelByPath(src_dir + request->model_path())){
+        std::string json = generateTerrainInfoJSON(mesh);
+        std::cout << json << std::endl;
+        reply->set_info(json);
+        return Status::OK;
+      }
     }
-    return Status::CANCELLED;
+    catch(...){
+      std::cout<<"Error when load model"<<std::endl;
+      return Status::CANCELLED;
+    }    
   }
 
   Status SimplifyTerrain(ServerContext* context, const SimplifyTerrainRequest* request,
                        ModelPath* reply) override {
-    std::cout<<"Simplify terrain"<<std::endl;
+    std::cout<<"Simplify Terrain"<<std::endl;
     geodesic::GeodesicAlgorithmExact algorithm(&mesh);
     float beta = request->beta();
     std::string old_model_path = src_dir + request->old_model_path();
+    std::cout << old_model_path << std::endl;
     // A FUNCTION TO SIMPLIFY
     bool graph_success = simplify::generate_graph(old_model_path, old_model_path+".graph");
     if(graph_success){
@@ -192,16 +211,19 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     return Status::CANCELLED;
   }
 
-  Status UploadModelContent(ServerContext* context, const ModelContent* request,
-                       ModelPath* reply) override {    
-    std::cout<<"upload content"<<std::endl;
-    std::ofstream outfile;
-    // TODO: assume upload off file only, later need to do format conversion from obj to off, etc
-    outfile.open(src_dir+"models/off/upload.off");
-    outfile << request->content();
-    outfile.close();
-    reply->set_model_path("models/off/upload.off");
-    return Status::OK;
+  Status UploadModelContent(ServerContext* context, ServerReader<ModelContent>* reader,
+                     ModelPath* reply) override {
+      std::cout<<"Upload Model Content"<<std::endl;
+      ModelContent txt;             
+      std::ofstream outfile;
+      outfile.open(src_dir+"models/off/upload.off");            
+      while (reader->Read(&txt)) {
+          outfile << txt.content() << std::endl;
+      }
+      outfile.close();
+      std::cout << "Saved to: "+ src_dir+"models/off/upload.off" << std::endl;
+      reply->set_model_path("models/off/upload.off");
+      return Status::OK;
   }
 };
 

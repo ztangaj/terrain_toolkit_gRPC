@@ -16,7 +16,7 @@ service Geodesic {
   rpc LoadModel(ModelPath) returns(TerrainInfo){}
   // get the content, save it to a file and return the path, since browser cannot do so due to security reason
   // TODO: implement a stream rpc, this function can only deal with small file
-  rpc UploadModelContent(ModelContent) returns(ModelPath){}
+  rpc UploadModelContent(stream ModelContent) returns(ModelPath){}
 }
 
 // Dummy request

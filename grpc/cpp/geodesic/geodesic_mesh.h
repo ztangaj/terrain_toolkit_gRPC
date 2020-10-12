@@ -159,7 +159,7 @@ void Mesh::initialize_mesh_data(unsigned num_vertices,
 			f.adjacent_vertices()[j] = &m_vertices[vertex_index];
 		}
 	}
-
+	// std::cout<<"before build adj"<<std::endl;
 	build_adjacencies();	//build the structure of the mesh
 }
 
@@ -187,6 +187,7 @@ inline void Mesh::build_adjacencies()
 										  num_adjacent_faces);	
 	}
 
+	// std::cout<<"test 1"<<std::endl;
 	std::fill(count.begin(), count.end(), 0);
 	for(unsigned i=0; i<m_faces.size(); ++i)
 	{
@@ -218,6 +219,7 @@ inline void Mesh::build_adjacencies()
 	}
 	std::sort(half_edges.begin(), half_edges.end());
 
+	// std::cout<<"test 2"<<std::endl;
 	unsigned number_of_edges = 1;
 	for(unsigned i=1; i<half_edges.size(); ++i)
 	{
@@ -267,9 +269,11 @@ inline void Mesh::build_adjacencies()
 
 	//			Vertices->adjacent Edges
 	std::fill(count.begin(), count.end(), 0);
+	std::cout<<"test 3.1.1"<<std::endl;
 	for(unsigned i=0; i<m_edges.size(); ++i)
 	{
 		Edge& e = m_edges[i];
+		// TODO: This part may throws segmentation fault if the income mesh is not terrain
 		assert(e.adjacent_vertices().size()==2);
 		count[e.adjacent_vertices()[0]->id()]++;
 		count[e.adjacent_vertices()[1]->id()]++;
@@ -280,6 +284,7 @@ inline void Mesh::build_adjacencies()
 													  count[i]);	
 	}
 	std::fill(count.begin(), count.end(), 0);
+	std::cout<<"test 3.3"<<std::endl;
 	for(unsigned i=0; i<m_edges.size(); ++i)
 	{
 		Edge& e = m_edges[i];
@@ -289,7 +294,6 @@ inline void Mesh::build_adjacencies()
 			v->adjacent_edges()[count[v->id()]++] = &e;
 		}
 	}	
-
 	//			Faces->adjacent Edges
 	for(unsigned i=0; i<m_faces.size(); ++i)
 	{

@@ -35,10 +35,17 @@
 	</head>
 
 	<body>
-		Upload Model <input type="file" name="inputfile" id="inputfile">
-		<!-- <div id="info">
-		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> Terrain ToolKit
-		</div> -->
+		<div>Upload Model <input type="file" name="inputfile" id="inputfile"></div>
+		<div>Format Conversion</div>
+		<div>
+			<label for="formats">Choose an output format:</label>
+			<select id="format_dropdown">
+				<option value="OBJ">OBJ</option>
+				<option value="PLY">PLY</option>
+				<option value="OFF">OFF</option>
+			</select>
+			<button onclick="format_convert_download()">Convert</button> 	  
+		</div>
 
 		<script src="js/WebGL.js"></script>
 		<script src="../build/three.js"></script>
@@ -47,6 +54,8 @@
 		<script src="js/dat.gui.js"></script>
 		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="offLoader.js"></script>
+		<script src="objLoader.js"></script>
+		<script src="plyLoader.js"></script>
 		
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vUv;				
@@ -98,6 +107,7 @@
 			// https://3d-convert.com/en/convert/off-to-obj.html
 			// var MODEL_PATH = "/etc/terrain_toolkit/models/obj/small_terrain.off";
 			var MODEL_PATH = "models/off/small_terrain.off";
+			var HIGHLIGHT_VERTEX = "highlight_vertex";
 
 			var container;		
 
@@ -110,7 +120,9 @@
 
 			var controls;		
 
-			var vertices;	
+			var vertices;
+
+			var vertex_points;	
 
 			var model;
 
@@ -119,19 +131,6 @@
 			var controlPanel;
 
 			var terrainInfo;
-
-			var highlightVertex = true;
-
-			var pointMaterial = new THREE.ShaderMaterial( {
-				uniforms: {
-					color: { value: new THREE.Color( 0xffffff ) },
-					texture: { value: new THREE.TextureLoader().load( "textures/sprites/ball.png" ) }
-				},
-				vertexShader: document.getElementById( 'vertexshaderPt' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentshaderPt' ).textContent,
-
-				alphaTest: 0.9
-			} );
 
 			var panel_options = {
 				basicInfo: null,
@@ -150,53 +149,51 @@
 				}	
 			};
 
+			function format_convert_download(){
+				if(!model){
+					alert("Please upload a model first!");
+				}
+				var e = document.getElementById("format_dropdown");
+				var format = e.options[e.selectedIndex].value;
+				var res;
+				switch(format){
+					case "OBJ":
+						res = ObjLoader.exportModel(model.v, model.f);
+						break;
+					case "PLY":
+						res = PlyLoader.exportModel(model.v, model.f);
+						break;
+					case "OFF":
+						res = OffLoader.exportModel(model.v, model.f);
+						break;
+				}
+				var a = window.document.createElement('a');
+				a.href = window.URL.createObjectURL(new Blob([res]));
+				a.download = "WebTerrain_convert."+format;
+				// Append anchor to body.
+				document.body.appendChild(a);
+				a.click();
+				// Remove anchor from body
+				document.body.removeChild(a);
+			}
+
 			function loadModel(path){
 				fetch(path)
 				.then(response => response.text())
 				.then((data) => {
-					serverLoadModel(path);
-					model = loadOffModel(data);
+					serverLoadModelByPath(path);
+					// var customLoader = new OffLoader();
+					model = OffLoader.loadModel(data);
 					console.log(model);
 					meterial = generateMaterial(model.z.min, model.z.max);
 					cleanup();
-					visualizeModel(camera, controls, scene, model, meterial);
-					showVertices(model);
+					OffLoader.visualizeModel(camera, controls, scene, model, meterial);
+					generateVertexPoints(model);
 					animate(); 
-					// getTerrainInfo(panel_options);				
+					// getTerrainInfo(panel_options);													
   				})
 			}
-
-			function showVertices(model) {
-				if(highlightVertex){				
-					vertices = model.v;
-					var vertices_raw = new Float32Array(3*vertices.length);
-					for(var i=0; i<vertices.length;i++){
-						vertices_raw[3*i] = vertices[i].x;
-						vertices_raw[3*i+1] = vertices[i].y;
-						vertices_raw[3*i+2] = vertices[i].z;
-					}
-					console.log(vertices_raw);
-					var colors = new Float32Array( vertices_raw.length );
-					var sizes = new Float32Array( vertices_raw.length );
-
-					var color = new THREE.Color();
-					for ( var i = 0, l = vertices_raw.length / 3; i < l; i ++ ) {
-						color = new THREE.Color("rgb(255,0,0)");
-						color.toArray( colors, i * 3 );
-						sizes[ i ] = PARTICLE_SIZE;
-					}
-					var geometry = new THREE.BufferGeometry();
-					geometry.addAttribute( 'position', new THREE.BufferAttribute( vertices_raw, 3 ) );
-					geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
-					geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
-
-					// deprecated, don't use sprit for vertex now
-					particles = new THREE.Points( geometry, pointMaterial );
-					particles.name = "points";
-					scene.add( particles );
-				}
-			}
-
+			
 			function cleanup(){     
 				console.log(scene);
 				vertices = [];
@@ -242,7 +239,7 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				console.log(scene);
-				// loadModel("models/off/small_terrain.off");		
+				// loadModel("models/off/large_terrain.off");
 			}						
 
 			function generateMaterial(min_z, max_z) {								
@@ -257,25 +254,36 @@
 				return newMaterial;
 			}
 
-			// on mouse click, get the vertice clicked and high light
-			function setVertexSize(attributes, index, scale) {
-				attributes.size.array[ index ] = PARTICLE_SIZE * scale;
-				attributes.size.needsUpdate = true;
-			}
+			function generateVertexPoints(model) {				
+				vertices = model.v;		
+				vertex_points = [];
+				var colors = new Float32Array([0,1,0]);
+				var sizes = new Float32Array([PARTICLE_SIZE]);						
+				var pointMaterial = new THREE.ShaderMaterial( {
+					uniforms: {
+						color: { value: new THREE.Color( 0xffffff ) },
+						texture: { value: new THREE.TextureLoader().load( "textures/sprites/ball.png" ) }
+					},
+					vertexShader: document.getElementById( 'vertexshaderPt' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentshaderPt' ).textContent,
 
-			function setVertexColor(attributes, index, r,g,b){
-				attributes.customColor.array[ 3 * index ] = r;
-				attributes.customColor.array[ 3 * index + 1 ] = g;
-				attributes.customColor.array[ 3 * index + 2 ] = b;
-				attributes.customColor.needsUpdate = true;
+					alphaTest: 0.9
+				} );
+
+				for(var i=0; i<vertices.length;i++){
+					var pos = new Float32Array([vertices[i].x, vertices[i].y, vertices[i].z]);
+					var geometry = new THREE.BufferGeometry();
+					geometry.addAttribute( 'position', new THREE.BufferAttribute( pos, 3 ) );
+					geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+					geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+					pt = new THREE.Points( geometry, pointMaterial );
+					vertex_points.push(pt);
+				}
 			}
 
 			function onMouseClick() {
-				var attributes = particles.geometry.attributes;
-				var positionArray = attributes.position.array;
-
 				raycaster.setFromCamera(mouse, camera);
-				intersects = raycaster.intersectObject(particles);
+				intersects = raycaster.intersectObjects(vertex_points);
 
 				// no need to be too precise, otherwise selection can be hard
 				raycaster.params = {
@@ -285,40 +293,37 @@
 					Points: { threshold: 15 },
 					Sprite: { threshold: 1}
 				}
-			
+				
 				if(intersects.length > 0){
-					// TODO: eliminate the repeated points in the array, for now we only take the first coordinate				
-					var attribute_index = 3 * intersects[0].index;
-					var currentPoint = new THREE.Vector3(positionArray[attribute_index], positionArray[attribute_index+1], positionArray[attribute_index+2])
+					var pt = intersects[0].object;
+					var pos = pt.geometry.attributes.position.array;			
+					var currentPoint = new THREE.Vector3(pos);
 					
-					// check if this is a new point
 					var isNewPoint = true;
 					for(var i = 0; i<selectedPoints.length; i++){
+						// if repete selection, deselect
 						if(selectedPoints[i].equals(currentPoint)){
 							isNewPoint = false;
 							selectedPoints.splice(i, 1);
 							// remove highlight
-							for(var j=0; j<intersects.length; j++){						
-								setVertexSize(attributes, intersects[j].index, 1);
-								setVertexColor(attributes, intersects[j].index, 1.0, 0.0, 0.0);
-							}						
+							scene.remove(pt);							
 							break;
 						}
 					}			
-
-					// new point and selected less than 2
-					if(isNewPoint && selectedPoints.length < 2) {
-						selectedPoints.push(currentPoint);						
-						// color and enlarge need to be done for all repeated points
-						for(var i=0; i<intersects.length; i++){						
-							setVertexSize(attributes, intersects[i].index, 1.25);
-							setVertexColor(attributes, intersects[i].index, 0.0, 1.0, 0.0);
-						}						
-					}			
-					else{
-						alert("You have selected 2 points");
-					}	
-					// if new point but selected is already 2, do nothing, user need to deselect previous points, maybe a bad design
+					
+					if(isNewPoint){
+						// if new point but selected is already 2, do nothing, user need to deselect previous points, maybe a bad design
+						if(selectedPoints.length == 2){
+							alert("You have selected 2 points");
+						}
+						// new point and selected less than 2
+						if(selectedPoints.length < 2) {
+							selectedPoints.push(currentPoint);						
+							for(var i=0; i<intersects.length; i++){						
+								scene.add(pt);
+							}						
+						}				
+					}									
 					// console.log(selectedPoints);
 					panel_options.pointA = selectedPoints[0] ? vec3ToString(selectedPoints[0]) : "empty";
 					panel_options.pointB = selectedPoints[1] ? vec3ToString(selectedPoints[1]) : "empty";
@@ -342,7 +347,7 @@
 			// helper function
 			function findPath(v1, v2) {
 				if(selectedPoints[0]&&selectedPoints[1]){
-					axios.post('http://localhost:8080/getpath', {
+					axios.post('http://localhost:50055/getpath', {
 						v1: v1.x + "," + v1.y + "," +v1.z,
 						v2: v2.x + "," + v2.y + "," +v2.z
 					})
@@ -356,24 +361,20 @@
 			}
 
 			function simplifyTerrain(model_path){
-				axios.post('http://localhost:8080/simplify-terrain', {
+				axios.post('http://localhost:50055/simplify-terrain', {
 					beta: panel_options.beta,
 					old_model_path: model_path
 				})
 				.then(function(response){
-					panel_options.pointA = response.model_path;
-					console.log(response);
 					loadModel(response.data.model_path);
-					// alert(response);
-					// reload model based on returned new model path
 				})
 				.catch(function (error) {
 					console.log(error);
 				});
 			}
 
-			function serverLoadModel(model_path){
-				axios.post('http://localhost:8080/load-model', {
+			function serverLoadModelByPath(model_path){
+				axios.post('http://localhost:50055/load-model', {
 					model_path: model_path
 				})
 				.then(function(response){
@@ -385,32 +386,6 @@
 					console.log(error);
 				});
 			}
-
-			function uploadModelContent(content) {
-				axios.post('http://localhost:8080/upload-model-content', {
-					content: content
-				})
-				.then(function (response) {
-					MODEL_PATH = response.data.model_path;
-					loadModel(MODEL_PATH);
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			}
-			
-			//deprecated, get the info when loading model in c++
-			// function getTerrainInfo(panel_options){
-			// 	axios.get('http://localhost:8080/get-terrain-info', {})
-			// 	.then(function (response) {
-			// 		var info = JSON. parse(response.data.info);
-			// 		panel_options.basicInfo = info;
-			// 		refreshControlPanel(panel_options);
-			// 	})
-			// 	.catch(function (error) {
-			// 		console.log(error);
-			// 	});
-			// }
 
 			function drawPath(pathStr){
 				var cords = pathStr.split(",");	
@@ -485,7 +460,7 @@
 				points.open();
 
 				var simplify = controlPanel.addFolder('Terrain Simplification');
-				var beta_slidebar = simplify.add(options, 'beta', 1, 10).name('Error parameter').listen();
+				var beta_slidebar = simplify.add(options, 'beta', 1, 2).name('Error parameter').listen();
 				beta_slidebar.onChange(function(value){
 					panel_options.beta = value;
 				})				
@@ -507,22 +482,49 @@
 				renderer.render( scene, camera );
 			}
 			
+			// main
 			var inputfile = document.getElementById('inputfile');
 			inputfile.onchange = function() {
-				console.log("file selected");
-				var fr=new FileReader();
-				fr.readAsText(this.files[0]);
-				fr.onload = function(){
-					// // serverLoadModel()
-					// model = loadOffModel(fr.result);
-					// meterial = generateMaterial(model.z.min, model.z.max);
-					// cleanup();
-					// visualizeModel(camera, controls, scene, model, meterial);
-					// showVertices(model);
-					// animate(); 
-					// getTerrainInfo(panel_options);
-					uploadModelContent(fr.result);
-				};
+				console.log("file selected");	
+				// get content 
+				var reader = new FileReader();
+				var content;
+				var filename = this.files[0].name.toLowerCase();
+
+				reader.readAsText(this.files[0]);
+				reader.onload = function (evt) {
+					content = evt.target.result;
+					// check extension & parse the model
+					if(filename.endsWith("off")){
+						model = OffLoader.loadModel(content);
+					}
+					else if(filename.endsWith("obj")){
+						model = ObjLoader.loadModel(content);
+					}
+					else if(filename.endsWith("ply")){
+						model = PlyLoader.loadModel(content);
+					}
+					// convert to off
+					var off_str = OffLoader.exportModel(model.v, model.f);
+					// console.log(off_str);
+
+					var file = new Blob([off_str]);
+					var formData = new FormData();
+					formData.append('model_file', file, filename)
+					console.log(formData);
+					axios.post('http://localhost:50055/upload-model-content', formData)
+					.then(function (response) {
+						MODEL_PATH = response.data.model_path;
+						loadModel(MODEL_PATH);
+					})
+					.catch(function (error) {
+						console.log(error);
+					});				
+				}
+				reader.onerror = function (evt) {
+					console.log("error reading file");
+				}
+				
 			};
 
 			init();			

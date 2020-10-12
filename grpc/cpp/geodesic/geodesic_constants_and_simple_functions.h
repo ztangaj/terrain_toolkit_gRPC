@@ -51,7 +51,10 @@ inline bool read_mesh_from_file(char* filename,
 {
 	std::ifstream file(filename);
 	assert(file.is_open());
-	if(!file.is_open()) return false;
+	if(!file.is_open()) {
+		std::cout << "Cannot open file" << std::endl; 
+		return false;
+	}
     std::string dum;
     unsigned num_edges;
     file >> dum; 
@@ -64,13 +67,13 @@ inline bool read_mesh_from_file(char* filename,
 	file >> num_faces;
     file >> num_edges;
     
-//    std::cout << num_points << " " << num_faces << std::endl; 
+   	std::cout << num_points << " " << num_faces << " " << num_edges << std::endl; 
     unsigned dummy;
 	points.resize(num_points*3);
 	for(typename Points::iterator i=points.begin(); i!=points.end(); ++i)
 	{
 		file >> *i;
-     //   std::cout << *i << std::endl;
+    //    std::cout << *i << std::endl;
 	}
 
 	faces.resize(num_faces*3);
@@ -93,7 +96,7 @@ inline bool read_mesh_from_file(char* filename,
       //      std::cout << std::endl << dummy;
         }
         file >> faces[i];
-    //    std::cout << " " << faces[i];
+       	// std::cout << " " << faces[i];
     }
 	file.close();
 

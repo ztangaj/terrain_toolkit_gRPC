@@ -113,4 +113,22 @@ class PlyLoader {
         scene.add(group);
         controls.update();
     }
+
+    static exportModel(vertices, faces){
+        var res = "ply\n";
+        res += "comment Model exported by WebTerrain\n";
+        res += "format ascii 1.0\n";
+        res += "element vertex " + vertices.length + "\n";
+        res += "element face " + faces.length + "\n";
+        res += "end_header\n";
+        for(var i=0; i<vertices.length; i++){
+            var v = vertices[i];
+            res += v.x + " " + v.y + " " + v.z + "\n";
+        }
+        for(var i=0; i<faces.length; i++){
+            var f = faces[i];
+            res += "3 " + f[0] + " " + f[1] + " " + f[2] + "\n";
+        }
+        return res;
+    }
 }
