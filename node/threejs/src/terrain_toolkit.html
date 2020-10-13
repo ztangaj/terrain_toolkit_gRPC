@@ -104,36 +104,27 @@
 				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
 			}
 
-			// https://3d-convert.com/en/convert/off-to-obj.html
-			// var MODEL_PATH = "/etc/terrain_toolkit/models/obj/small_terrain.off";
-			var MODEL_PATH = "models/off/small_terrain.off";
 			var HIGHLIGHT_VERTEX = "highlight_vertex";
 
-			var container;		
-
+			var container;
 			var camera, scene, renderer;
-
 			var particles;
+			// TODO: adjust PARTICLE_SIZE to resize according to input model
 			var PARTICLE_SIZE = 30;
-
 			var raycaster, intersects, mouse;
-
 			var controls;		
-
 			var vertices;
-
 			var vertex_points;	
 
 			var model;
+			var mesh;
 
 			var selectedPoints = [];
 
 			var controlPanel;
 
-			var terrainInfo;
-
 			var panel_options = {
-				basicInfo: null,
+				basicInfo: {},
 				pointA: "empty",
 				pointB: "empty",
 				findPath: function(){
@@ -184,14 +175,39 @@
 					serverLoadModelByPath(path);
 					// var customLoader = new OffLoader();
 					model = OffLoader.loadModel(data);
-					console.log(model);
-					meterial = generateMaterial(model.z.min, model.z.max);
+					console.log(model);					
 					cleanup();
-					OffLoader.visualizeModel(camera, controls, scene, model, meterial);
+					visualizeModel(camera, controls, scene, model);
 					generateVertexPoints(model);
-					animate(); 
-					// getTerrainInfo(panel_options);													
+					animate(); 												
   				})
+			}
+
+			function visualizeModel(camera, controls, scene, model){
+				var vertices = model.v;
+				var faces= model.f;
+				mesh = new THREE.Group();
+
+				material = generateMaterial(model.z.min, model.z.max);
+			
+				faces.forEach(f => {
+					var geometry = new THREE.BufferGeometry().setFromPoints([vertices[f[0]], vertices[f[1]] , vertices[f[2]], vertices[f[0]]]);
+					var line = new THREE.Line( geometry, material );     
+					mesh.add(line);
+				});
+				var boundingbox = new THREE.Box3();
+				boundingbox.setFromObject(mesh);
+				var center = boundingbox.getCenter();
+				var sceneRadiusForCamera = Math.max(
+					boundingbox.max.y - boundingbox.min.y,
+					boundingbox.max.z - boundingbox.min.z,
+					boundingbox.max.x - boundingbox.min.x
+				)/2 * (1 + Math.sqrt(5));
+					
+				camera.position.set(center.x, center.y, center.z + sceneRadiusForCamera);
+				controls.target.set(center.x, center.y, center.z);
+				scene.add(mesh);
+				controls.update();
 			}
 			
 			function cleanup(){     
@@ -199,7 +215,7 @@
 				vertices = [];
 				faces = [];
 				selectedPoints = [];
-				group = new THREE.Group();
+				mesh = new THREE.Group();
 				to_remove = [];
 				for(var i =0; i<scene.children.length;i++){
 					var child = scene.children[i];
@@ -239,7 +255,6 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				console.log(scene);
-				// loadModel("models/off/large_terrain.off");
 			}						
 
 			function generateMaterial(min_z, max_z) {								
@@ -374,6 +389,7 @@
 			}
 
 			function serverLoadModelByPath(model_path){
+
 				axios.post('http://localhost:50055/load-model', {
 					model_path: model_path
 				})
@@ -425,8 +441,7 @@
 			}
 			
 			function refreshControlPanel(panel_options) {
-				// Options to be added to the GUI				
-				var options = panel_options;
+				
 				// DAT.GUI Related Stuff
 				// refresh
 				if(controlPanel) {
@@ -435,20 +450,33 @@
 
 				controlPanel = new dat.GUI();
 
-				if(options.basicInfo){
+				if(mesh){
+					panel_options.basicInfo.vertices = model.v.length;
+					panel_options.basicInfo.faces = model.f.length;
+					var boundingbox = new THREE.Box3();
+					boundingbox.setFromObject(mesh);
+					panel_options.basicInfo.minx = boundingbox.min.x;
+					panel_options.basicInfo.miny = boundingbox.min.y;
+					panel_options.basicInfo.minz = boundingbox.min.z;
+					panel_options.basicInfo.maxx = boundingbox.max.x;
+					panel_options.basicInfo.maxy = boundingbox.max.y;
+					panel_options.basicInfo.maxz = boundingbox.max.z;
+
 					var terrainInfoFolder = controlPanel.addFolder('Basic information');
-					terrainInfoFolder.add(options.basicInfo, 'vertices').name('Number of vertices');
-					terrainInfoFolder.add(options.basicInfo, 'edges').name('Number of edges');
-					terrainInfoFolder.add(options.basicInfo, 'faces').name('Number of faces');
-					terrainInfoFolder.add(options.basicInfo, 'minx').name('Min x');
-					terrainInfoFolder.add(options.basicInfo, 'maxx').name('Max x');
-					terrainInfoFolder.add(options.basicInfo, 'miny').name('Min y');
-					terrainInfoFolder.add(options.basicInfo, 'maxy').name('Max y');
-					terrainInfoFolder.add(options.basicInfo, 'minz').name('Min z');
-					terrainInfoFolder.add(options.basicInfo, 'maxz').name('Max z');
+					terrainInfoFolder.add(panel_options.basicInfo, 'vertices').name('Number of vertices');
+					// terrainInfoFolder.add(panel_options.basicInfo, 'edges').name('Number of edges');
+					terrainInfoFolder.add(panel_options.basicInfo, 'faces').name('Number of faces');
+					terrainInfoFolder.add(panel_options.basicInfo, 'minx').name('Min x');
+					terrainInfoFolder.add(panel_options.basicInfo, 'maxx').name('Max x');
+					terrainInfoFolder.add(panel_options.basicInfo, 'miny').name('Min y');
+					terrainInfoFolder.add(panel_options.basicInfo, 'maxy').name('Max y');
+					terrainInfoFolder.add(panel_options.basicInfo, 'minz').name('Min z');
+					terrainInfoFolder.add(panel_options.basicInfo, 'maxz').name('Max z');
 					terrainInfoFolder.open();
-				}
+				}			
 				
+				// Options to be added to the GUI				
+				var options = panel_options;
 
 				var points = controlPanel.addFolder('Selected Points');
 				points.add(options, 'pointA').name('Point A').listen();
@@ -505,21 +533,24 @@
 						model = PlyLoader.loadModel(content);
 					}
 					// convert to off
-					var off_str = OffLoader.exportModel(model.v, model.f);
-					// console.log(off_str);
-
-					var file = new Blob([off_str]);
-					var formData = new FormData();
-					formData.append('model_file', file, filename)
-					console.log(formData);
-					axios.post('http://localhost:50055/upload-model-content', formData)
-					.then(function (response) {
-						MODEL_PATH = response.data.model_path;
-						loadModel(MODEL_PATH);
-					})
-					.catch(function (error) {
-						console.log(error);
-					});				
+					// var off_str = OffLoader.exportModel(model.v, model.f);
+					// var file = new Blob([off_str]);
+					// var formData = new FormData();
+					// formData.append('model_file', file, filename)
+					// console.log(formData);
+					// axios.post('http://localhost:50055/upload-model-content', formData)
+					// .then(function (response) {
+					// 	MODEL_PATH = response.data.model_path;
+					// 	loadModel(MODEL_PATH);
+					// })
+					// .catch(function (error) {
+					// 	console.log(error);
+					// });				
+					cleanup();
+					visualizeModel(camera, controls, scene, model);
+					generateVertexPoints(model);
+					refreshControlPanel(panel_options);
+					animate(); 
 				}
 				reader.onerror = function (evt) {
 					console.log("error reading file");
@@ -529,7 +560,6 @@
 
 			init();			
 			animate();	
-			// refreshControlPanel(panel_options);
 		</script>
 
 	</body>

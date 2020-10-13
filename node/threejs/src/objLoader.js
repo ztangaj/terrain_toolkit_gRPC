@@ -64,7 +64,6 @@ class ObjLoader {
                 v1 = parseInt(infos[1].split("/")[0], 10)-1;
                 v2 = parseInt(infos[2].split("/")[0], 10)-1;
                 v3 = parseInt(infos[3].split("/")[0], 10)-1;
-                console.log(v1+" "+v2+" "+v3);
                 faces.push([v1,v2,v3]); 
             }           
         }
@@ -72,32 +71,7 @@ class ObjLoader {
         var model =  {"v":vertices, "f":faces, "z":{"min":minz, "max":maxz}};
         console.log(model);
         return model;
-    }
-
-    static visualizeModel(camera, controls, scene, model, material){
-        var vertices = model.v;
-        var faces= model.f;
-        var group = new THREE.Group();
-    
-        faces.forEach(f => {
-            var geometry = new THREE.BufferGeometry().setFromPoints([vertices[f[0]], vertices[f[1]] , vertices[f[2]], vertices[f[0]]]);
-            var line = new THREE.Line( geometry, material );     
-            group.add(line);
-        });
-        var boundingbox = new THREE.Box3();
-        boundingbox.setFromObject(group);
-        var center = boundingbox.getCenter();
-        var sceneRadiusForCamera = Math.max(
-            boundingbox.max.y - boundingbox.min.y,
-            boundingbox.max.z - boundingbox.min.z,
-            boundingbox.max.x - boundingbox.min.x
-        )/2 * (1 + Math.sqrt(5));
-            
-        camera.position.set(center.x, center.y, center.z + sceneRadiusForCamera);
-        controls.target.set(center.x, center.y, center.z);
-        scene.add(group);
-        controls.update();
-    }
+    }    
 
     static exportModel(vertices, faces){
         var res = "# Model exported by WebTerrain\n";

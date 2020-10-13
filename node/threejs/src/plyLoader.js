@@ -89,31 +89,6 @@ class PlyLoader {
         return model;
     }
 
-    static visualizeModel(camera, controls, scene, model, material){
-        var vertices = model.v;
-        var faces= model.f;
-        var group = new THREE.Group();
-    
-        faces.forEach(f => {
-            var geometry = new THREE.BufferGeometry().setFromPoints([vertices[f[0]], vertices[f[1]] , vertices[f[2]], vertices[f[0]]]);
-            var line = new THREE.Line( geometry, material );     
-            group.add(line);
-        });
-        var boundingbox = new THREE.Box3();
-        boundingbox.setFromObject(group);
-        var center = boundingbox.getCenter();
-        var sceneRadiusForCamera = Math.max(
-            boundingbox.max.y - boundingbox.min.y,
-            boundingbox.max.z - boundingbox.min.z,
-            boundingbox.max.x - boundingbox.min.x
-        )/2 * (1 + Math.sqrt(5));
-            
-        camera.position.set(center.x, center.y, center.z + sceneRadiusForCamera);
-        controls.target.set(center.x, center.y, center.z);
-        scene.add(group);
-        controls.update();
-    }
-
     static exportModel(vertices, faces){
         var res = "ply\n";
         res += "comment Model exported by WebTerrain\n";
