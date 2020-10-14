@@ -112,13 +112,15 @@ class PlyLoader {
         return model;
     }
 
-    static exportModel(vertices, faces){
+    static exportModel(model){
         var res = "ply\n";
         res += "comment Model exported by WebTerrain\n";
         res += "format ascii 1.0\n";
         res += "element vertex " + vertices.length + "\n";
         res += "element face " + faces.length + "\n";
         res += "end_header\n";
+        var vertices = model.v;
+        var faces = model.f;
         for(var i=0; i<vertices.length; i++){
             var v = vertices[i];
             res += v.x + " " + v.y + " " + v.z + "\n";

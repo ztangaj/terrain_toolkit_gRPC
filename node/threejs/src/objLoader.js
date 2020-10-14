@@ -99,8 +99,10 @@ class ObjLoader {
         return model;
     }    
 
-    static exportModel(vertices, faces){
+    static exportModel(model){
         var res = "# Model exported by WebTerrain\n";
+        var vertices = model.v;
+        var faces = model.f;
         for(var i=0; i<vertices.length; i++){
             var v = vertices[i];
             res += "v " + v.x + " " + v.y + " " + v.z + "\n";
