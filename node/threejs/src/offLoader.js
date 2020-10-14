@@ -69,6 +69,7 @@ class OffLoader {
         // get list of faces
         var v1, v2, v3;
         var faceLineStart = vertexLineStart + vertexCount;
+        var edge_set = [];
     
         for(var i=0; i<faceCount; i++){
             var line = allLines[i+faceLineStart];
@@ -77,28 +78,43 @@ class OffLoader {
             v2 = parseInt(infos[2], 10);
             v3 = parseInt(infos[3], 10);        
             faces.push([v1,v2,v3]);
-            // edges implementation
-            // var e1 = new VertexPair(v1,v2);
-            // var e2 = new VertexPair(v1,v3);
-            // var e3 = new VertexPair(v2,v3);
-            // var temp = [e1,e2,e3];
-            // temp.forEach(element => {
-            //     if(!edge_exist(edges, element)){
-            //         edges.push(element);
-            //     }
-            // });    
+            // edges count
+            var e1 = [v1,v2];
+            var e2 = [v2,v3];
+            var e3 = [v3,v1];
+            var el = [e1,e2,e3];
+            // check duplicate
+            if(edge_set.length==0){
+                edge_set.push(e1);
+            }                        
+            for(var j=0;j<el.length;j++){
+                var exists = false;
+                for(var k=0;k<edge_set.length;k++){
+                    if(el[j][0]==edge_set[k][0]&&el[j][1]==edge_set[k][1]){
+                        exists = true;
+                    }
+                    if(el[j][0]==edge_set[k][1]&&el[j][1]==edge_set[k][0]){
+                        exists = true;
+                    }        
+                }
+                if(!exists){
+                    // console.log("new edge!", el[i], edge_set.length);
+                    edge_set.push(el[j])
+                }
+            }
         }
-        var model =  {"v":vertices, "f":faces, "z":{"min":minz, "max":maxz}};
+        var model =  {"v":vertices, "f":faces, "e":edge_set, "z":{"min":minz, "max":maxz}};
         console.log(model);
         return model;
     }
 
-    static exportModel(vertices, faces){
+    static exportModel(model){        
         var res = "";
         res += "OFF\n";
-        // TODO: in some format we dont have edge count
-        res += vertices.length + " " + faces.length + " " + faces.length + "\n";
-        for(var i=0; i<vertices.length; i++){
+        res += model.v.length + " " + model.f.length + " " + model.e.length + "\n";
+        var vertices = model.v;
+        var faces = model.f;
+        for(var i=0; i< vertices.length; i++){
             var v = vertices[i];
             res += v.x + " " + v.y + " " + v.z + "\n";
         }

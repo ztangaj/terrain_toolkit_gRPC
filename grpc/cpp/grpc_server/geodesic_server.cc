@@ -131,16 +131,23 @@ class GeodesicServiceImpl final : public Geodesic::Service {
       std::cout<<"Load model by path: " << path << std::endl;
 
       char* path_c = strcpy(new char[path.length() + 1], path.c_str());
-      bool success = geodesic::read_mesh_from_file(path_c, points,faces);
-      if(!success)
-      {
-        // TODO::handle error
-        std::cout<<"Load model failed!"<<std::endl;
-        return false;
+      try{
+        bool success = geodesic::read_mesh_from_file(path_c, points,faces);
+        if(!success)
+        {
+          // TODO::handle error
+          std::cout<<"Load model failed!"<<std::endl;
+          return false;
+
+        }
+        std::cout<<"Load model finished, init mesh"<<std::endl;
+        mesh.initialize_mesh_data(points, faces);
+        return true;
       }
-      std::cout<<"Load model finished, init mesh"<<std::endl;
-      mesh.initialize_mesh_data(points, faces);
-      return true;
+      catch (const char* msg) {
+        std::cerr << "catched exception " << msg << std::endl;
+        return false;
+      }      
     }
 
   Status SayHello(ServerContext* context, const HelloRequest* request,
@@ -149,26 +156,31 @@ class GeodesicServiceImpl final : public Geodesic::Service {
     reply->set_message(prefix + request->name());
     return Status::OK;
   }
+
   Status FindPathByVertexCord(ServerContext* context, const FindPathByVertexCordRequest* request,
                        Path* reply) override {
     std::cout<<"Find Path"<<std::endl;
-    geodesic::GeodesicAlgorithmExact algorithm(&mesh);
-    geodesic::SurfacePoint source = findVertexByCordStr(request->v1(), &mesh);
-    geodesic::SurfacePoint destination = findVertexByCordStr(request->v2(), &mesh);
+    if(LoadModelByPath(src_dir + request->model_path())){
+      geodesic::GeodesicAlgorithmExact algorithm(&mesh);
+      geodesic::SurfacePoint source = findVertexByCordStr(request->v1(), &mesh);
+      geodesic::SurfacePoint destination = findVertexByCordStr(request->v2(), &mesh);
 
-    std::vector<geodesic::SurfacePoint> path;
-    algorithm.geodesic(source, destination, path);
+      std::vector<geodesic::SurfacePoint> path;
+      algorithm.geodesic(source, destination, path);
 
-    for(unsigned i = 0; i<path.size(); ++i)
-    {
-        geodesic::SurfacePoint& s = path[i];        
-        // std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
-        reply->add_path(s.x());
-        reply->add_path(s.y());
-        reply->add_path(s.z());
+      for(unsigned i = 0; i<path.size(); ++i)
+      {
+          geodesic::SurfacePoint& s = path[i];        
+          // std::cout << s.x() << "\t" << s.y() << "\t" << s.z() << std::endl;
+          reply->add_path(s.x());
+          reply->add_path(s.y());
+          reply->add_path(s.z());
+      }
+      reply->set_message("success");
+      return Status::OK;
     }
-    reply->set_message("success");
-    return Status::OK;
+    reply->set_message("Find path failed, possibly the model is not a valid terrain");
+    return Status::OK; // if return Canceled we cannot pass the message out
   }
 
   Status LoadModel(ServerContext* context, const ModelPath* request,
@@ -182,6 +194,10 @@ class GeodesicServiceImpl final : public Geodesic::Service {
         reply->set_info(json);
         return Status::OK;
       }
+      else{
+        std::cout<<"Not terrain model"<<std::endl;
+        return Status::CANCELLED;
+      }
     }
     catch(...){
       std::cout<<"Error when load model"<<std::endl;
@@ -192,22 +208,31 @@ class GeodesicServiceImpl final : public Geodesic::Service {
   Status SimplifyTerrain(ServerContext* context, const SimplifyTerrainRequest* request,
                        ModelPath* reply) override {
     std::cout<<"Simplify Terrain"<<std::endl;
-    geodesic::GeodesicAlgorithmExact algorithm(&mesh);
-    float beta = request->beta();
     std::string old_model_path = src_dir + request->old_model_path();
-    std::cout << old_model_path << std::endl;
-    // A FUNCTION TO SIMPLIFY
-    bool graph_success = simplify::generate_graph(old_model_path, old_model_path+".graph");
-    if(graph_success){
-      std::string graph_path = old_model_path.append(".graph");
-      std::string off_path = std::regex_replace(graph_path, std::regex(".off.graph"), std::to_string(beta)) + ".off";
-      bool off_success = simplify::generateOff(graph_path, beta, off_path);
-      if(off_success){        
-        std::cout<<off_path<<std::endl;
-        reply->set_model_path(std::regex_replace(off_path, std::regex(src_dir), std::string("")));
-        return Status::OK;
+    if(!LoadModelByPath(old_model_path)){
+      reply->set_message("Load model failed, possibly the model is not a valid terrain");
+      return Status::OK;
+    }
+    try{            
+      float beta = request->beta();
+      bool graph_success = simplify::generate_graph(old_model_path, old_model_path+".graph");
+      if(graph_success){
+        std::string graph_path = old_model_path.append(".graph");
+        std::string off_path = std::regex_replace(graph_path, std::regex(".off.graph"), std::to_string(beta)) + ".off";
+        bool off_success = simplify::generateOff(graph_path, beta, off_path);
+        if(off_success){        
+          std::cout<<off_path<<std::endl;
+          reply->set_model_path(std::regex_replace(off_path, std::regex(src_dir), std::string("")));
+          return Status::OK;      
+        }
       }
     }
+    catch(...){
+      std::cout<<"Exception catched"<<std::endl;
+      reply->set_message("Unknown exception for terrain simplification");
+      return Status::OK;
+    }
+    reply->set_message("Unknown exception for terrain simplification");
     return Status::CANCELLED;
   }
 

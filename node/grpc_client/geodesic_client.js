@@ -37,32 +37,42 @@ app.use(bodyParser.urlencoded({ extended: false }))
 function getPath(query, successCallback, errorCallback) {
   var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
   client.FindPathByVertexCord(query, function(err, response){
-    successCallback(response.path);
-    errorCallback(err);
+    if(response){      
+      if(response.path.length>0){
+        successCallback(response.path);
+      }
+      errorCallback(response.message);
+    }
+    else{
+      errorCallback("Server no response");
+    }
   });
 }
 
 function loadModel(query, successCallback, errorCallback){
   var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
   client.LoadModel(query, function(err, response){
-    successCallback(response.info);
-    errorCallback(err);
+    if(response){
+      successCallback(response.info);
+    }
+    else{
+      errorCallback(err);
+    }
   });
 }
 
 function simplifyTerrain(query, successCallback, errorCallback){
   var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
   client.SimplifyTerrain(query, function(err, response){
-    successCallback(response.model_path);
-    errorCallback(err);
-  });
-}
-
-function uploadModelContent(query, successCallback, errorCallback){
-  var client = new geodesic_proto.Geodesic('localhost:50051', grpc.credentials.createInsecure());
-  client.UploadModelContent(query, function(err, response){
-    successCallback(response.model_path);
-    errorCallback(err);
+    if(response){
+      if(response.model_path != ""){
+        successCallback(response.model_path);
+      }
+      errorCallback(response.message);
+    }
+    else{
+      errorCallback("Server no response");
+    }
   });
 }
 
@@ -75,8 +85,7 @@ function getPathAsync(query) {
     getPath(query,(successResponse) => {
           resolve(successResponse);
       }, (errorResponse) => {
-          console.log(errorResponse);
-          reject(errorResponse)
+        reject(new Error(errorResponse));
       });
   });
 }
@@ -86,8 +95,8 @@ function loadModelAsync(query){
     loadModel(query,(successResponse) => {
           resolve(successResponse);
       }, (errorResponse) => {
-          console.log(errorResponse);
-          reject(errorResponse)
+          // console.log(errorResponse);
+          reject(new Error(errorResponse));
       });
   });
 }
@@ -97,34 +106,44 @@ function simplifyTerrainAsync(query){
     simplifyTerrain(query,(successResponse) => {
           resolve(successResponse);
       }, (errorResponse) => {
-          console.log(errorResponse);
-          reject(errorResponse)
+          // console.log(errorResponse);
+          reject(new Error(errorResponse));
       });
   });
 }
 
 // API
 app.post('/getpath', function(request, response) {
-  console.log("post request for path received");
+  console.log("post request for find path received");
   // console.log(request.body.v1);
   // console.log(request.body.v2);
-  getPathAsync(request.body).then((result)=>{
+  getPathAsync(request.body)
+  .then((result)=>{
     response.json({path: result.toString()});
     response.status(200).end();
+  })
+  .catch((err)=>{
+    console.log(err);
+    response.statusMessage = err;
+    response.status(500).end();
   })
 })
 
 app.post('/load-model', function(request, response) {
   console.log("post request for load model received");
-  loadModelAsync(request.body).then((result)=>{
+  loadModelAsync(request.body)
+  .then((result)=>{
     console.log(result);
     response.json({info: result.toString()});
     response.status(200).end();
   })
+  .catch((err)=>{
+    response.status(500).end();
+    console.log(err);
+  })
 })
 
 app.post('/upload-model-content', upload.single("model_file"), function(request, response) {
-  console.log(request);
   console.log("post request for upload model received");
   // var buf = fs.readFileSync(SRC_DIR + request.body.model_path);
   var buf = fs.readFileSync(request.file.path);
@@ -151,10 +170,16 @@ app.post('/upload-model-content', upload.single("model_file"), function(request,
 
 app.post('/simplify-terrain', multer().array(), function(request, response) {
   console.log("post request for terrain simplification received");
-  simplifyTerrainAsync(request.body).then((result)=>{
+  simplifyTerrainAsync(request.body)
+  .then((result)=>{
     console.log(result);
     response.json({model_path: result.toString()});
     response.status(200).end();
+  })
+  .catch((err)=>{
+    console.log(err);
+    response.statusMessage = err;
+    response.status(500).end();
   })
 })
 

@@ -58,6 +58,9 @@ class ObjLoader {
                 var v = new THREE.Vector3(x, y, z);
                 vertices.push(v);
             }   
+
+            var edge_set = [];
+
             if(line.startsWith("f")){  
                 // parse face
                 var infos = line.split(" ");
@@ -65,10 +68,33 @@ class ObjLoader {
                 v2 = parseInt(infos[2].split("/")[0], 10)-1;
                 v3 = parseInt(infos[3].split("/")[0], 10)-1;
                 faces.push([v1,v2,v3]); 
+                // edges count
+                var e1 = [v1,v2];
+                var e2 = [v2,v3];
+                var e3 = [v3,v1];
+                var el = [e1,e2,e3];
+                // check duplicate
+                if(edge_set.length==0){
+                    edge_set.push(e1);
+                }                        
+                for(var j=0;j<el.length;j++){
+                    var exists = false;
+                    for(var k=0;k<edge_set.length;k++){
+                        if(el[j][0]==edge_set[k][0]&&el[j][1]==edge_set[k][1]){
+                            exists = true;
+                        }
+                        if(el[j][0]==edge_set[k][1]&&el[j][1]==edge_set[k][0]){
+                            exists = true;
+                        }        
+                    }
+                    if(!exists){
+                        edge_set.push(el[j])
+                    }
+                }
             }           
         }
-  
-        var model =  {"v":vertices, "f":faces, "z":{"min":minz, "max":maxz}};
+
+        var model =  {"v":vertices, "f":faces, "e":edge_set, "z":{"min":minz, "max":maxz}};
         console.log(model);
         return model;
     }    

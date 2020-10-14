@@ -241,7 +241,7 @@ int read_points(p3list &vertices)
     points[n][0] = vertices[i].x;
     points[n][1] = vertices[i].y;
     P[n] = points[n];
-                assert(++n <= N);
+    assert(++n <= N);
   }
   return n;
 }

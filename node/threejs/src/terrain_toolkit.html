@@ -46,6 +46,9 @@
 			</select>
 			<button onclick="format_convert_download()">Convert</button> 	  
 		</div>
+		<div id="wait_info" style="visibility:hidden">
+			Connecting to backend, please wait...
+		</div>
 
 		<script src="js/WebGL.js"></script>
 		<script src="../build/three.js"></script>
@@ -122,13 +125,14 @@
 			var selectedPoints = [];
 
 			var controlPanel;
+			var MODEL_PATH;
 
 			var panel_options = {
 				basicInfo: {},
 				pointA: "empty",
 				pointB: "empty",
 				findPath: function(){
-					findPath(selectedPoints[0], selectedPoints[1])
+					findPath(MODEL_PATH, selectedPoints[0], selectedPoints[1])
 				},
 				distance: 0.0,
 				beta: 1,
@@ -136,7 +140,7 @@
 					simplifyTerrain(MODEL_PATH);
 				},		
 				reset: function(){
-					cleanup();
+					reset();
 				}	
 			};
 
@@ -149,13 +153,13 @@
 				var res;
 				switch(format){
 					case "OBJ":
-						res = ObjLoader.exportModel(model.v, model.f);
+						res = ObjLoader.exportModel(model);
 						break;
 					case "PLY":
-						res = PlyLoader.exportModel(model.v, model.f);
+						res = PlyLoader.exportModel(model);
 						break;
 					case "OFF":
-						res = OffLoader.exportModel(model.v, model.f);
+						res = OffLoader.exportModel(model);
 						break;
 				}
 				var a = window.document.createElement('a');
@@ -172,13 +176,12 @@
 				fetch(path)
 				.then(response => response.text())
 				.then((data) => {
-					serverLoadModelByPath(path);
-					// var customLoader = new OffLoader();
 					model = OffLoader.loadModel(data);
 					console.log(model);					
 					cleanup();
 					visualizeModel(camera, controls, scene, model);
 					generateVertexPoints(model);
+					refreshControlPanel(panel_options);
 					animate(); 												
   				})
 			}
@@ -210,8 +213,22 @@
 				controls.update();
 			}
 			
-			function cleanup(){     
+			function reset(){     
 				console.log(scene);
+				selectedPoints = [];
+				to_remove = [];
+				for(var i =0; i<scene.children.length;i++){
+					var child = scene.children[i];
+					if(child.type!="Group" && child.type!="AmbientLight" && child.type!="PerspectiveCamera") {
+						to_remove.push(child);
+					};
+				}
+				to_remove.forEach(child => {
+					scene.remove(child);
+				});
+			}
+
+			function cleanup(){     
 				vertices = [];
 				faces = [];
 				selectedPoints = [];
@@ -219,7 +236,7 @@
 				to_remove = [];
 				for(var i =0; i<scene.children.length;i++){
 					var child = scene.children[i];
-					if(child.type!="AmbientLight" || child.type!="PerspectiveCamera") {
+					if(child.type!="AmbientLight" && child.type!="PerspectiveCamera") {
 						to_remove.push(child);
 					};
 				}
@@ -255,6 +272,7 @@
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				console.log(scene);
+				console.log(container);
 			}						
 
 			function generateMaterial(min_z, max_z) {								
@@ -344,6 +362,7 @@
 					panel_options.pointB = selectedPoints[1] ? vec3ToString(selectedPoints[1]) : "empty";
 					refreshControlPanel(panel_options);
 				}
+
 			}
 
 			function onWindowResize() {
@@ -354,54 +373,12 @@
 
 			function  onDocumentMouseMove( event ) {
 				event.preventDefault();
-				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-				// offset is 1 in 3js example, but by my finetune should be 1.08 
-				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1.08;
+				// consider the offset caused by other divs
+				mouse.x = ( ( event.clientX - renderer.domElement.offsetLeft ) / renderer.domElement.width ) * 2 - 1;
+    			mouse.y = - ( ( event.clientY - renderer.domElement.offsetTop ) / renderer.domElement.height ) * 2 + 1;
 			}
 
-			// helper function
-			function findPath(v1, v2) {
-				if(selectedPoints[0]&&selectedPoints[1]){
-					axios.post('http://localhost:50055/getpath', {
-						v1: v1.x + "," + v1.y + "," +v1.z,
-						v2: v2.x + "," + v2.y + "," +v2.z
-					})
-					.then(function (response) {
-						drawPath(response.data.path);
-					})
-					.catch(function (error) {
-						console.log(error);
-					});
-				}
-			}
-
-			function simplifyTerrain(model_path){
-				axios.post('http://localhost:50055/simplify-terrain', {
-					beta: panel_options.beta,
-					old_model_path: model_path
-				})
-				.then(function(response){
-					loadModel(response.data.model_path);
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			}
-
-			function serverLoadModelByPath(model_path){
-
-				axios.post('http://localhost:50055/load-model', {
-					model_path: model_path
-				})
-				.then(function(response){
-					var info = JSON. parse(response.data.info);
-					panel_options.basicInfo = info;
-					refreshControlPanel(panel_options);
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			}
+		
 
 			function drawPath(pathStr){
 				var cords = pathStr.split(",");	
@@ -423,17 +400,7 @@
 				console.log( distances[distances.length-1]);
 				scene.add(line);
 				refreshControlPanel(panel_options);
-			}
- 
-			function getCameraDistance(object) {
-				 var boundingbox = new THREE.Box3();
-				 boundingbox.setFromObject(object);
-				 sceneRadiusForCamera = Math.max(
-					 boundingbox.max.y - boundingbox.min.y,
-					 boundingbox.max.z - boundingbox.min.z,
-					 boundingbox.max.x - boundingbox.min.x
-				 )/2 * (1 + Math.sqrt(5));
-				 return sceneRadiusForCamera;
+				selectedPoints = [];
 			}
 
 			function vec3ToString(vec){
@@ -453,6 +420,7 @@
 				if(mesh){
 					panel_options.basicInfo.vertices = model.v.length;
 					panel_options.basicInfo.faces = model.f.length;
+					panel_options.basicInfo.edges = model.e.length;
 					var boundingbox = new THREE.Box3();
 					boundingbox.setFromObject(mesh);
 					panel_options.basicInfo.minx = boundingbox.min.x;
@@ -464,7 +432,7 @@
 
 					var terrainInfoFolder = controlPanel.addFolder('Basic information');
 					terrainInfoFolder.add(panel_options.basicInfo, 'vertices').name('Number of vertices');
-					// terrainInfoFolder.add(panel_options.basicInfo, 'edges').name('Number of edges');
+					terrainInfoFolder.add(panel_options.basicInfo, 'edges').name('Number of edges');
 					terrainInfoFolder.add(panel_options.basicInfo, 'faces').name('Number of faces');
 					terrainInfoFolder.add(panel_options.basicInfo, 'minx').name('Min x');
 					terrainInfoFolder.add(panel_options.basicInfo, 'maxx').name('Max x');
@@ -492,7 +460,9 @@
 				beta_slidebar.onChange(function(value){
 					panel_options.beta = value;
 				})				
-				simplify.add(options, 'simplify').name('Simplify terrain');
+				if(model){
+					simplify.add(options, 'simplify').name('Simplify terrain');
+				}				
 				simplify.open();
 
 				controlPanel.add(options, 'reset');
@@ -510,6 +480,76 @@
 				renderer.render( scene, camera );
 			}
 			
+		
+
+			// API helper function
+			function findPath(model_path, v1, v2) {
+				if(selectedPoints[0]&&selectedPoints[1]){
+					document.getElementById("wait_info").style.visibility="visible";
+					axios.post('http://localhost:50055/getpath', {
+						model_path: model_path,
+						v1: v1.x + "," + v1.y + "," +v1.z,
+						v2: v2.x + "," + v2.y + "," +v2.z
+					})
+					.then(function (response) {
+						document.getElementById("wait_info").style.visibility="hidden";
+						drawPath(response.data.path);
+					})
+					.catch(function (error) {
+						document.getElementById("wait_info").style.visibility="hidden";
+						alert(error.response.statusText);
+					});
+				}
+			}
+
+			function simplifyTerrain(model_path){
+				document.getElementById("wait_info").style.visibility="visible";
+				axios.post('http://localhost:50055/simplify-terrain', {
+					beta: panel_options.beta,
+					old_model_path: model_path
+				})
+				.then(function(response){
+					document.getElementById("wait_info").style.visibility="hidden";
+					loadModel(response.data.model_path);
+				})
+				.catch(function(error) {
+					document.getElementById("wait_info").style.visibility="hidden";
+					alert(error.response.statusText);
+				});
+			}
+
+			function serverLoadModelByPath(model_path){
+				document.getElementById("wait_info").style.visibility="visible";
+				axios.post('http://localhost:50055/load-model', {
+					model_path: model_path
+				})
+				.then(function(response){
+					document.getElementById("wait_info").style.visibility="hidden";
+					var info = JSON. parse(response.data.info);
+					panel_options.basicInfo = info;
+					refreshControlPanel(panel_options);
+				})
+				.catch(function (error) {
+					document.getElementById("wait_info").style.visibility="hidden";
+					alert(error);
+				});
+			}
+
+			async function uploadModelContent(model){
+				// convert to off
+				var off_str = OffLoader.exportModel(model);
+				var file = new Blob([off_str]);
+				var formData = new FormData();
+				formData.append('model_file', file)
+				axios.post('http://localhost:50055/upload-model-content', formData)
+				.then(function (response) {
+					MODEL_PATH = response.data.model_path;					
+				})
+				.catch(function (error) {
+					console.log(error);
+				});		
+			}			
+						
 			// main
 			var inputfile = document.getElementById('inputfile');
 			inputfile.onchange = function() {
@@ -531,33 +571,18 @@
 					}
 					else if(filename.endsWith("ply")){
 						model = PlyLoader.loadModel(content);
-					}
-					// convert to off
-					// var off_str = OffLoader.exportModel(model.v, model.f);
-					// var file = new Blob([off_str]);
-					// var formData = new FormData();
-					// formData.append('model_file', file, filename)
-					// console.log(formData);
-					// axios.post('http://localhost:50055/upload-model-content', formData)
-					// .then(function (response) {
-					// 	MODEL_PATH = response.data.model_path;
-					// 	loadModel(MODEL_PATH);
-					// })
-					// .catch(function (error) {
-					// 	console.log(error);
-					// });				
+					}					
 					cleanup();
 					visualizeModel(camera, controls, scene, model);
 					generateVertexPoints(model);
 					refreshControlPanel(panel_options);
 					animate(); 
+					uploadModelContent(model);					
 				}
 				reader.onerror = function (evt) {
 					console.log("error reading file");
-				}
-				
+				}					
 			};
-
 			init();			
 			animate();	
 		</script>
