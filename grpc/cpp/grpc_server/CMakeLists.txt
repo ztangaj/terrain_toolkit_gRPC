@@ -121,6 +121,8 @@ if ( NOT Boost_FOUND )
 
 endif()
 
+find_package( Threads REQUIRED )
+
 # Targets greeter_[async_](client|server)
 #foreach(_target
 #  geodesic_client geodesic_server)

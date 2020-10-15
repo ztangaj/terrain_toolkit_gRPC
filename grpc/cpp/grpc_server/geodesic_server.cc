@@ -51,7 +51,7 @@ using grpc::Status;
 using namespace geodesic_gRPC;
 
 //TODO: only valid for wsl environment, make it to be read from config file
-std::string src_dir = "/mnt/c/Users/huaxuan/source/repos/terrain_web/node/threejs/src/";
+std::string src_dir = "/project/kdd/public_html/WebTerrain/hgaoab/terrain_toolkit_web/node/threejs/src/";
 
 geodesic::SurfacePoint findVertexByCordStr(std::string cordStr, geodesic::Mesh* mesh){
   std::string delimiter = ",";
