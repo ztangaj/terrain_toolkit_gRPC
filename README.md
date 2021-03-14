@@ -1,7 +1,9 @@
 # terrain_toolkit_gRPC Tutorial
 Based on Ubuntu 20.04
 
-## Pre-requisites
+# Pre-requisites
+
+## Some libraries
 
 ```ruby
  $ sudo apt-get install build-essential autoconf libtool pkg-config
@@ -24,6 +26,8 @@ in vs code, search
 home/tongcheng/Documents/terrain_toolkit_web
 ```
 replace to your own path (eg. 'xxx/terrain_toolkit_gRPC')
+
+# Backend server
 
 ## Clone the repository in _grpc_
 ```ruby
@@ -68,7 +72,7 @@ https://www.boost.org/doc/libs/1_65_1/more/getting_started/unix-variants.html
  $ ./b2
 ```
 ## Set the path of boost-1.65.1
-(change _/path/to_ to your own path that contains boost_1_65_1)
+(change _/path/to_ to your own path that contains boost_1_65_1, for me, it is _/home/tongcheng/Downloads/_)
 ```ruby
  $ cd /terrain_toolkit_gRPC/grpc/cpp/grpc_server/cmake/build
  $ unset LD_LIBRARY_PATH
@@ -114,6 +118,26 @@ find_package(Protobuf REQUIRED)
 ```
 
 
-## reference: 
+## Reference: 
 https://chromium.googlesource.com/external/github.com/grpc/grpc/+/HEAD/BUILDING.md
 https://grpc.io/docs/languages/cpp/quickstart/
+https://gitee.com/lancelotghx/terrain_toolkit_web/tree/0a186d15f4f963dbb8797c0c9d8f8d0520a509e1/node
+https://github.com/grpc/grpc/issues/11378
+
+# Frontend Server
+*You should start the client in a new terminal*
+
+## Install some required npm packages
+```ruby
+ $ cd node
+ $ npm i
+ $ cd grpc client
+ $ node ./geodesic_client.js
+ $ npm install express
+ $ npm install @grpc/proto-loader
+```
+
+## Start the client
+```ruby
+ $ node ./geodesic client.js
+```
