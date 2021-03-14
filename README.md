@@ -1,7 +1,5 @@
-# terrain_toolkit_gRPC
-fix some bugs in the original code and add readme file
-
-# first, I highly recommand you to use Ubuntu 20.04
+# terrain_toolkit_gRPC Tutorial
+Based on Ubuntu 20.04
 
 ## Pre-requisites
 
