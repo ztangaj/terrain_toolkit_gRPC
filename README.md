@@ -1,7 +1,5 @@
-# terrain_toolkit_gRPC
-fix some bugs in the original code and add readme file
-
-# first, I highly recommand you to use Ubuntu 20.04
+# terrain_toolkit_gRPC Tutorial
+Based on Ubuntu 20.04
 
 ## Pre-requisites
 
@@ -87,8 +85,10 @@ https://www.boost.org/doc/libs/1_65_1/more/getting_started/unix-variants.html
  $ ./geodesic_server
 ```
 
+
 ## Troubleshooting
 ### Can't use protobuf in cmakelists.txt
+https://stackoverflow.com/questions/41573702/cant-use-protobuf-in-cmakelists-txt
 error: 
 ```ruby
 CMake Error at CMakeLists.txt:9 (find_package):
@@ -112,6 +112,8 @@ Replace to:
 ```ruby
 find_package(Protobuf REQUIRED)
 ```
-reference: https://stackoverflow.com/questions/41573702/cant-use-protobuf-in-cmakelists-txt
 
-reference: https://chromium.googlesource.com/external/github.com/grpc/grpc/+/HEAD/BUILDING.md
+
+## reference: 
+https://chromium.googlesource.com/external/github.com/grpc/grpc/+/HEAD/BUILDING.md
+https://grpc.io/docs/languages/cpp/quickstart/
