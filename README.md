@@ -5,5 +5,7 @@ fix some bugs in the original code and add readme file
 
 Clone this file. 
 
+```ruby
  $ [sudo] apt-get install build-essential autoconf libtool pkg-config
  
+```
