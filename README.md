@@ -33,7 +33,6 @@ replace to your own path (eg. 'xxx/terrain_toolkit_gRPC')
  $ git clone https://github.com/grpc/grpc
  $ cd grpc
  $ git submodule update --init
- $ cd ../
 ```
 ## Build from source
 ```ruby
@@ -43,14 +42,50 @@ replace to your own path (eg. 'xxx/terrain_toolkit_gRPC')
  $ make
 ```
 
+## Install after build
+*If you have any problem, see the Troubleshooting*
+```ruby
+# NOTE: all of gRPC's dependencies need to be already installed
+$ cd ../../../cpp/grpc_server/
+$ cd cmake/build
+$ cmake ../.. -DgRPC_INSTALL=ON                \
+              -DCMAKE_BUILD_TYPE=Release       \
+              -DgRPC_ABSL_PROVIDER=package     \
+              -DgRPC_CARES_PROVIDER=package    \
+              -DgRPC_PROTOBUF_PROVIDER=package \
+              -DgRPC_RE2_PROVIDER=package      \
+              -DgRPC_SSL_PROVIDER=package      \
+              -DgRPC_ZLIB_PROVIDER=package
+$ make
+```
+
 ## Install boost-1.65.1
 Since apt-get do not provide old version of boost, we should install it from SourceForge
-Click the following link to install in your own local path (eg. _path/to_)
+Click the following link to install in your own local path (eg. _/path/to_)
 https://www.boost.org/doc/libs/1_65_1/more/getting_started/unix-variants.html
 ```ruby
  $ tar --bzip2 -xf /path/to/boost_1_65_1.tar.bz2
+ $ cd /path/to/boost_1_65_1
+ $ ./bootstrap.sh
+ $ ./b2
+```
+## Set the path of boost-1.65.1
+(change _/path/to_ to your own path that contains boost_1_65_1)
+```ruby
+ $ cd /terrain_toolkit_gRPC/grpc/cpp/grpc_server/cmake/build
+ $ unset LD_LIBRARY_PATH
+ $ export LD_LIBRARY_PATH=/path/to/boost_1_65_1/stage/lib:$LD_LIBRARY_PATHD
 ```
 
+## Check ldd to make sure all of the required libraries found
+```ruby
+ $ ldd geodesic_server
+```
+
+## Start the gRPC server!
+```ruby
+ $ ./geodesic_server
+```
 
 ## Troubleshooting
 ### Can't use protobuf in cmakelists.txt
