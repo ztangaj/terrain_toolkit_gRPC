@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package geodesic_gRPC;
+
+// The greeting service definition.
+service Geodesic {
+  // Sends a greeting, dummy
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  // request shortest path using vertex id
+  rpc FindPathByVertexCord(FindPathByVertexCordRequest) returns (Path) {}
+  // terrain information in json format
+  // rpc GetTerrainInfo(HelloRequest) returns(TerrainInfo) {}
+  // produce a .graph file and .off file of the simplified terrain based on beta param
+  rpc SimplifyTerrain(SimplifyTerrainRequest) returns(ModelPath){}
+  // load the mesh in c++ for terrain info and shortest path computation
+  rpc LoadModel(ModelPath) returns(TerrainInfo){}
+  // get the content, save it to a file and return the path, since browser cannot do so due to security reason
+  // TODO: implement a stream rpc, this function can only deal with small file
+  rpc UploadModelContent(stream ModelContent) returns(ModelPath){}
+}
+
+// Dummy request
+message HelloRequest {
+  string name = 1;
+}
+
+// Dummy reply with only a message
+message HelloReply {
+  string message = 1;
+}
+
+// request shortest path using vertex id
+message FindPathByVertexCordRequest {
+    string model_path = 1;
+    string v1 = 2;
+    string v2 = 3;
+}
+
+message SimplifyTerrainRequest {
+  float beta = 1;
+  string old_model_path = 2;
+}
+
+// the response containing the path
+message Path {
+    repeated float path = 1;
+    string message = 2;
+}
+
+message TerrainInfo{
+  string info = 1;
+}
+
+message ModelPath {
+  string model_path = 1;
+  string message = 2
+;}
+
+message ModelContent {
+  string content = 1;
+}

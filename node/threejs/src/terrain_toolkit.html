@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Terrain ToolKit Web Version</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000;
+				color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				color: #fff;
+				position: relative;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#pickPoint {
+				color: #fff;
+				position: relative;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+			}
+			#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+		</style>
+	</head>
+
+	<body>
+		<div>Upload Model <input type="file" name="inputfile" id="inputfile"></div>
+		<div>Format Conversion</div>
+		<div>
+			<label for="formats">Choose an output format:</label>
+			<select id="format_dropdown">
+				<option value="OBJ">OBJ</option>
+				<option value="PLY">PLY</option>
+				<option value="OFF">OFF</option>
+			</select>
+			<button onclick="format_convert_download()">Convert</button> 	  
+		</div>
+		<div id="wait_info" style="visibility:hidden">
+			Connecting to backend, please wait...
+		</div>
+
+		<script src="js/WebGL.js"></script>
+		<script src="../build/three.js"></script>
+		<script src="js/loaders/OBJLoader.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src="js/dat.gui.js"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="offLoader.js"></script>
+		<script src="objLoader.js"></script>
+		<script src="plyLoader.js"></script>
+		
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec3 vUv;				
+			void main() {
+				vUv = position;
+				vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+				gl_Position = projectionMatrix * modelViewPosition;
+			}			
+		</script>
+		<script type="x-shader/x-fragmant" id="fragmentShader" src="shaders/terrainFragment">
+			float min_z = MIN_Z;
+			float max_z = MAX_Z;
+			varying vec3 vUv;
+			void main(){
+				float r = (vUv.z - min_z)/(max_z - min_z);
+				gl_FragColor = vec4(r, 1.0-r, 0.0, 1.0);
+			}
+		</script>
+		<!-- for add sprit on vertex points-->
+		<script type="x-shader/x-vertex" id="vertexshaderPt">
+		attribute float size;
+		attribute vec3 customColor;
+		varying vec3 vColor;
+		void main() {
+			vColor = customColor;
+			vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+			gl_PointSize = size * ( 300.0 / -mvPosition.z );
+			gl_Position = projectionMatrix * mvPosition;
+		}
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshaderPt">
+		uniform vec3 color;
+		uniform sampler2D texture;
+		varying vec3 vColor;
+		void main() {
+			gl_FragColor = vec4( color * vColor, 1.0 );
+			gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+			if ( gl_FragColor.a < ALPHATEST ) discard;
+		}
+		</script>
+			
+	
+		<script>			
+			if ( WEBGL.isWebGLAvailable() === false ) {
+				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+			}
+
+			var HIGHLIGHT_VERTEX = "highlight_vertex";
+
+			var container;
+			var camera, scene, renderer;
+			var particles;
+			// TODO: adjust PARTICLE_SIZE to resize according to input model
+			var PARTICLE_SIZE = 30;
+			var raycaster, intersects, mouse;
+			var controls;		
+			var vertices;
+			var vertex_points;	
+
+			var model;
+			var mesh;
+
+			var selectedPoints = [];
+
+			var controlPanel;
+			var MODEL_PATH;
+
+			var panel_options = {
+				basicInfo: {},
+				pointA: "empty",
+				pointB: "empty",
+				findPath: function(){
+					findPath(MODEL_PATH, selectedPoints[0], selectedPoints[1])
+				},
+				distance: 0.0,
+				beta: 1,
+				simplify: function(){
+					simplifyTerrain(MODEL_PATH);
+				},		
+				reset: function(){
+					reset();
+				}	
+			};
+
+			function format_convert_download(){
+				if(!model){
+					alert("Please upload a model first!");
+				}
+				var e = document.getElementById("format_dropdown");
+				var format = e.options[e.selectedIndex].value;
+				var res;
+				switch(format){
+					case "OBJ":
+						res = ObjLoader.exportModel(model);
+						break;
+					case "PLY":
+						res = PlyLoader.exportModel(model);
+						break;
+					case "OFF":
+						res = OffLoader.exportModel(model);
+						break;
+				}
+				var a = window.document.createElement('a');
+				a.href = window.URL.createObjectURL(new Blob([res]));
+				a.download = "WebTerrain_convert."+format;
+				// Append anchor to body.
+				document.body.appendChild(a);
+				a.click();
+				// Remove anchor from body
+				document.body.removeChild(a);
+			}
+
+			function loadModel(path){
+				fetch(path)
+				.then(response => response.text())
+				.then((data) => {
+					model = OffLoader.loadModel(data);
+					console.log(model);					
+					cleanup();
+					visualizeModel(camera, controls, scene, model);
+					generateVertexPoints(model);
+					refreshControlPanel(panel_options);
+					animate(); 												
+  				})
+			}
+
+			function visualizeModel(camera, controls, scene, model){
+				var vertices = model.v;
+				var faces= model.f;
+				mesh = new THREE.Group();
+
+				material = generateMaterial(model.z.min, model.z.max);
+			
+				faces.forEach(f => {
+					var geometry = new THREE.BufferGeometry().setFromPoints([vertices[f[0]], vertices[f[1]] , vertices[f[2]], vertices[f[0]]]);
+					var line = new THREE.Line( geometry, material );     
+					mesh.add(line);
+				});
+				var boundingbox = new THREE.Box3();
+				boundingbox.setFromObject(mesh);
+				var center = boundingbox.getCenter();
+				var sceneRadiusForCamera = Math.max(
+					boundingbox.max.y - boundingbox.min.y,
+					boundingbox.max.z - boundingbox.min.z,
+					boundingbox.max.x - boundingbox.min.x
+				)/2 * (1 + Math.sqrt(5));
+					
+				camera.position.set(center.x, center.y, center.z + sceneRadiusForCamera);
+				controls.target.set(center.x, center.y, center.z);
+				scene.add(mesh);
+				controls.update();
+			}
+			
+			function reset(){     
+				console.log(scene);
+				selectedPoints = [];
+				to_remove = [];
+				for(var i =0; i<scene.children.length;i++){
+					var child = scene.children[i];
+					if(child.type!="Group" && child.type!="AmbientLight" && child.type!="PerspectiveCamera") {
+						to_remove.push(child);
+					};
+				}
+				to_remove.forEach(child => {
+					scene.remove(child);
+				});
+			}
+
+			function cleanup(){     
+				vertices = [];
+				faces = [];
+				selectedPoints = [];
+				mesh = new THREE.Group();
+				to_remove = [];
+				for(var i =0; i<scene.children.length;i++){
+					var child = scene.children[i];
+					if(child.type!="AmbientLight" && child.type!="PerspectiveCamera") {
+						to_remove.push(child);
+					};
+				}
+				to_remove.forEach(child => {
+					scene.remove(child);
+				});
+			}			
+				
+			function init() {	
+				var center;
+				var distance;
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+				scene = new THREE.Scene();
+				var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
+				scene.add( ambientLight );
+				var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+				camera.add( pointLight );
+				scene.add( camera );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				
+				controls = new THREE.OrbitControls( camera, renderer.domElement );																			
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+
+				renderer.domElement.addEventListener( 'dblclick', onMouseClick, false );
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				console.log(scene);
+				console.log(container);
+			}						
+
+			function generateMaterial(min_z, max_z) {								
+				var fragment_shader = document.getElementById('fragmentShader').textContent;
+				var new_shader = fragment_shader.replace("MAX_Z", max_z.toFixed(1));
+				new_shader = new_shader.replace("MIN_Z", min_z.toFixed(1));
+				var newMaterial = new THREE.ShaderMaterial({				
+					vertexShader: document.getElementById('vertexShader').textContent,					
+					fragmentShader: new_shader,	
+					wireframe: true,			
+				});
+				return newMaterial;
+			}
+
+			function generateVertexPoints(model) {				
+				vertices = model.v;		
+				vertex_points = [];
+				var colors = new Float32Array([0,1,0]);
+				var sizes = new Float32Array([PARTICLE_SIZE]);						
+				var pointMaterial = new THREE.ShaderMaterial( {
+					uniforms: {
+						color: { value: new THREE.Color( 0xffffff ) },
+						texture: { value: new THREE.TextureLoader().load( "textures/sprites/ball.png" ) }
+					},
+					vertexShader: document.getElementById( 'vertexshaderPt' ).textContent,
+					fragmentShader: document.getElementById( 'fragmentshaderPt' ).textContent,
+
+					alphaTest: 0.9
+				} );
+
+				for(var i=0; i<vertices.length;i++){
+					var pos = new Float32Array([vertices[i].x, vertices[i].y, vertices[i].z]);
+					var geometry = new THREE.BufferGeometry();
+					geometry.addAttribute( 'position', new THREE.BufferAttribute( pos, 3 ) );
+					geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+					geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+					pt = new THREE.Points( geometry, pointMaterial );
+					vertex_points.push(pt);
+				}
+			}
+
+			function onMouseClick() {
+				raycaster.setFromCamera(mouse, camera);
+				intersects = raycaster.intersectObjects(vertex_points);
+
+				// no need to be too precise, otherwise selection can be hard
+				raycaster.params = {
+					Mesh: {},
+					Line: { threshold: 1 },
+					LOD: {},
+					Points: { threshold: 15 },
+					Sprite: { threshold: 1}
+				}
+				
+				if(intersects.length > 0){
+					var pt = intersects[0].object;
+					var pos = pt.geometry.attributes.position.array;			
+					var currentPoint = new THREE.Vector3(pos);
+					
+					var isNewPoint = true;
+					for(var i = 0; i<selectedPoints.length; i++){
+						// if repete selection, deselect
+						if(selectedPoints[i].equals(currentPoint)){
+							isNewPoint = false;
+							selectedPoints.splice(i, 1);
+							// remove highlight
+							scene.remove(pt);							
+							break;
+						}
+					}			
+					
+					if(isNewPoint){
+						// if new point but selected is already 2, do nothing, user need to deselect previous points, maybe a bad design
+						if(selectedPoints.length == 2){
+							alert("You have selected 2 points");
+						}
+						// new point and selected less than 2
+						if(selectedPoints.length < 2) {
+							selectedPoints.push(currentPoint);						
+							for(var i=0; i<intersects.length; i++){						
+								scene.add(pt);
+							}						
+						}				
+					}									
+					// console.log(selectedPoints);
+					panel_options.pointA = selectedPoints[0] ? vec3ToString(selectedPoints[0]) : "empty";
+					panel_options.pointB = selectedPoints[1] ? vec3ToString(selectedPoints[1]) : "empty";
+					refreshControlPanel(panel_options);
+				}
+
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+
+			function  onDocumentMouseMove( event ) {
+				event.preventDefault();
+				// consider the offset caused by other divs
+				mouse.x = ( ( event.clientX - renderer.domElement.offsetLeft ) / renderer.domElement.width ) * 2 - 1;
+    			mouse.y = - ( ( event.clientY - renderer.domElement.offsetTop ) / renderer.domElement.height ) * 2 + 1;
+			}
+
+		
+
+			function drawPath(pathStr){
+				var cords = pathStr.split(",");	
+				var points = [];			
+				for(var i=0; i<cords.length; i+=3){
+					var v = new THREE.Vector3(cords[i], cords[i+1], cords[i+2]);
+					points.push(v);
+				}
+				var geometry = new THREE.BufferGeometry().setFromPoints(points);
+				var material = new THREE.LineBasicMaterial({
+					color: 0xffffff,
+					linewidth: 3,
+				});
+
+				var line = new THREE.Line(geometry, material);
+				line.computeLineDistances();
+				var distances = line.geometry.attributes.lineDistance.array;
+				panel_options.distance = distances[distances.length-1].toFixed(5);
+				console.log( distances[distances.length-1]);
+				scene.add(line);
+				refreshControlPanel(panel_options);
+				selectedPoints = [];
+			}
+
+			function vec3ToString(vec){
+				return vec.x + "," + vec.y + "," + vec.z;
+			}
+			
+			function refreshControlPanel(panel_options) {
+				
+				// DAT.GUI Related Stuff
+				// refresh
+				if(controlPanel) {
+					controlPanel.destroy();
+				}
+
+				controlPanel = new dat.GUI();
+
+				if(mesh){
+					panel_options.basicInfo.vertices = model.v.length;
+					panel_options.basicInfo.faces = model.f.length;
+					panel_options.basicInfo.edges = model.e.length;
+					var boundingbox = new THREE.Box3();
+					boundingbox.setFromObject(mesh);
+					panel_options.basicInfo.minx = boundingbox.min.x;
+					panel_options.basicInfo.miny = boundingbox.min.y;
+					panel_options.basicInfo.minz = boundingbox.min.z;
+					panel_options.basicInfo.maxx = boundingbox.max.x;
+					panel_options.basicInfo.maxy = boundingbox.max.y;
+					panel_options.basicInfo.maxz = boundingbox.max.z;
+
+					var terrainInfoFolder = controlPanel.addFolder('Basic information');
+					terrainInfoFolder.add(panel_options.basicInfo, 'vertices').name('Number of vertices');
+					terrainInfoFolder.add(panel_options.basicInfo, 'edges').name('Number of edges');
+					terrainInfoFolder.add(panel_options.basicInfo, 'faces').name('Number of faces');
+					terrainInfoFolder.add(panel_options.basicInfo, 'minx').name('Min x');
+					terrainInfoFolder.add(panel_options.basicInfo, 'maxx').name('Max x');
+					terrainInfoFolder.add(panel_options.basicInfo, 'miny').name('Min y');
+					terrainInfoFolder.add(panel_options.basicInfo, 'maxy').name('Max y');
+					terrainInfoFolder.add(panel_options.basicInfo, 'minz').name('Min z');
+					terrainInfoFolder.add(panel_options.basicInfo, 'maxz').name('Max z');
+					terrainInfoFolder.open();
+				}			
+				
+				// Options to be added to the GUI				
+				var options = panel_options;
+
+				var points = controlPanel.addFolder('Selected Points');
+				points.add(options, 'pointA').name('Point A').listen();
+				points.add(options, 'pointB').name('Point B').listen();
+				if(selectedPoints[0]&&selectedPoints[1]){
+					points.add(options, 'findPath').name('Find shortest path');
+				}
+				points.add(options, 'distance').name("Distance");
+				points.open();
+
+				var simplify = controlPanel.addFolder('Terrain Simplification');
+				var beta_slidebar = simplify.add(options, 'beta', 1, 2).name('Error parameter').listen();
+				beta_slidebar.onChange(function(value){
+					panel_options.beta = value;
+				})				
+				if(model){
+					simplify.add(options, 'simplify').name('Simplify terrain');
+				}				
+				simplify.open();
+
+				controlPanel.add(options, 'reset');
+			}			
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+				controls.update();
+				render();
+
+			}
+
+			function render() {						
+				renderer.render( scene, camera );
+			}
+			
+		
+
+			// API helper function
+			function findPath(model_path, v1, v2) {
+				if(selectedPoints[0]&&selectedPoints[1]){
+					document.getElementById("wait_info").style.visibility="visible";
+					axios.post('http://localhost:50055/getpath', {
+						model_path: model_path,
+						v1: v1.x + "," + v1.y + "," +v1.z,
+						v2: v2.x + "," + v2.y + "," +v2.z
+					})
+					.then(function (response) {
+						document.getElementById("wait_info").style.visibility="hidden";
+						drawPath(response.data.path);
+					})
+					.catch(function (error) {
+						document.getElementById("wait_info").style.visibility="hidden";
+						alert(error.response.statusText);
+					});
+				}
+			}
+
+			function simplifyTerrain(model_path){
+				document.getElementById("wait_info").style.visibility="visible";
+				axios.post('http://localhost:50055/simplify-terrain', {
+					beta: panel_options.beta,
+					old_model_path: model_path
+				})
+				.then(function(response){
+					document.getElementById("wait_info").style.visibility="hidden";
+					loadModel(response.data.model_path);
+				})
+				.catch(function(error) {
+					document.getElementById("wait_info").style.visibility="hidden";
+					alert(error.response.statusText);
+				});
+			}
+
+			function serverLoadModelByPath(model_path){
+				document.getElementById("wait_info").style.visibility="visible";
+				axios.post('http://localhost:50055/load-model', {
+					model_path: model_path
+				})
+				.then(function(response){
+					document.getElementById("wait_info").style.visibility="hidden";
+					var info = JSON. parse(response.data.info);
+					panel_options.basicInfo = info;
+					refreshControlPanel(panel_options);
+				})
+				.catch(function (error) {
+					document.getElementById("wait_info").style.visibility="hidden";
+					alert(error);
+				});
+			}
+
+			async function uploadModelContent(model){
+				// convert to off
+				var off_str = OffLoader.exportModel(model);
+				var file = new Blob([off_str]);
+				var formData = new FormData();
+				formData.append('model_file', file)
+				axios.post('http://localhost:50055/upload-model-content', formData)
+				.then(function (response) {
+					MODEL_PATH = response.data.model_path;					
+				})
+				.catch(function (error) {
+					console.log(error);
+				});		
+			}			
+						
+			// main
+			var inputfile = document.getElementById('inputfile');
+			inputfile.onchange = function() {
+				console.log("file selected");	
+				// get content 
+				var reader = new FileReader();
+				var content;
+				var filename = this.files[0].name.toLowerCase();
+
+				reader.readAsText(this.files[0]);
+				reader.onload = function (evt) {
+					content = evt.target.result;
+					// check extension & parse the model
+					if(filename.endsWith("off")){
+						model = OffLoader.loadModel(content);
+					}
+					else if(filename.endsWith("obj")){
+						model = ObjLoader.loadModel(content);
+					}
+					else if(filename.endsWith("ply")){
+						model = PlyLoader.loadModel(content);
+					}					
+					cleanup();
+					visualizeModel(camera, controls, scene, model);
+					generateVertexPoints(model);
+					refreshControlPanel(panel_options);
+					animate(); 
+					uploadModelContent(model);					
+				}
+				reader.onerror = function (evt) {
+					console.log("error reading file");
+				}					
+			};
+			init();			
+			animate();	
+		</script>
+
+	</body>
+</html>

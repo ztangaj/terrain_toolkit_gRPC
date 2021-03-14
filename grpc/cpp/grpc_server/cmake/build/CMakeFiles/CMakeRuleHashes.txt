@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+47da88fd95abaeba9d3b4b06861f5e16 geodesic.pb.cc
