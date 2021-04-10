@@ -27,7 +27,7 @@ home/tongcheng/Documents/terrain_toolkit_web
 ```
 replace to your own path (eg. 'xxx/terrain_toolkit_gRPC')
 
-# Backend server
+# GPRC Server
 
 ## Clone the repository in _grpc_
 ```ruby
@@ -124,13 +124,14 @@ https://grpc.io/docs/languages/cpp/quickstart/
 https://gitee.com/lancelotghx/terrain_toolkit_web/tree/0a186d15f4f963dbb8797c0c9d8f8d0520a509e1/node
 https://github.com/grpc/grpc/issues/11378
 
-# Frontend Server
+# GPRC Client
 *You should start the client in a new terminal*
 
 ## Install some required npm packages
 ```ruby
  $ cd node
  $ npm i
+ $ sudo npm install grpc
  $ cd grpc client
  $ node ./geodesic_client.js
  $ npm install express
@@ -141,3 +142,13 @@ https://github.com/grpc/grpc/issues/11378
 ```ruby
  $ node ./geodesic client.js
 ```
+
+# HTTP Server
+First, back to the terrain_toolkit_gRPC folder
+```ruby
+ $ sudo npm install --global http-server
+ $ http-server ./ 
+```
+
+# Start
+Goto http://127.0.0.1:8080/node/threejs/src/terrain_toolkit.html
