@@ -4,11 +4,13 @@
   "description": "gRPC in 3 minutes (Node.js) ===========================",
   "main": "index.js",
   "dependencies": {
-    "axios": "^0.20.0",
+    "@grpc/proto-loader": "^0.6.0",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "connect-busboy": "^0.0.2",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "grpc": "^1.24.6",
     "multer": "^1.4.2"
   },
   "devDependencies": {},
